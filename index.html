@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfólio</title>
+  <meta name="description" content="">
+  <meta name="theme-color" content="#0a0b0d">
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="" id="og-image">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="" id="og-url">
+  <meta property="og:locale" content="sk_SK">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="" id="tw-image">
+  <link rel="canonical" href="" id="canonical">
+
+  <!-- favicon: monogram sa dosadí z content.js za behu -->
+  <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0b0d'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='34' font-weight='700' fill='%23d6ff4b' text-anchor='middle'%3EAP%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- fonty načítavame NEblokujúco (media="print" → po načítaní sa prepne na all):
+       stránka sa vykreslí okamžite so systémovým fontom aj bez internetu / pri pomalej sieti -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+
+  <style>
+    :root {
+      --bg:        #0a0b0d;
+      --bg-grid:   rgba(255,255,255,0.02);
+      --surface:   #121318;
+      --surface-2: #16181e;
+      --surface-3: #1d2029;
+      --line:      #23262e;
+      --line-2:    #333844;
+      --text:      #f4f5f7;
+      --text-mid:  #a7abb5;
+      --text-dim:  #6a6e78;
+      --accent:    #d6ff4b;
+      --accent-2:  #ff9d54;
+      --accent-3:  #7cc5ff;
+      --glow:      color-mix(in srgb, var(--accent) 55%, transparent);
+      --radius:    16px;
+      --radius-sm: 10px;
+      --radius-xs: 8px;
+      --maxw:      860px;
+      --ease:      cubic-bezier(.22,.61,.36,1);
+      --shadow:    0 1px 0 rgba(255,255,255,.03) inset, 0 18px 40px -28px rgba(0,0,0,.9);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--text); }
+
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      position: relative;
+      min-height: 100vh;
+      background-color: var(--bg);
+      background-image: radial-gradient(var(--bg-grid) 1.3px, transparent 1.3px);
+      background-size: 26px 26px;
+      padding: 0 22px 90px;
+      overflow-x: hidden;
+    }
+    /* atmosféra — jemné akcentové prisvietenie zhora + vinieta zdola */
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(58% 40% at 15% -8%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
+        radial-gradient(52% 36% at 102% -2%, color-mix(in srgb, var(--accent-2) 8%, transparent), transparent 72%),
+        radial-gradient(90% 60% at 50% 118%, color-mix(in srgb, #000 60%, transparent), transparent 70%);
+    }
+    .wrap { max-width: var(--maxw); margin: 0 auto; position: relative; z-index: 1; }
+    code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+    .skip {
+      position: absolute; left: -9999px; top: auto; z-index: 50;
+      padding: 10px 16px; background: var(--accent); color: var(--bg);
+      border-radius: var(--radius-xs); font-weight: 600; text-decoration: none;
+    }
+    .skip:focus { left: 16px; top: 16px; outline: 2px solid var(--text); outline-offset: 2px; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(16px);
+      background: var(--surface-2); border: 1px solid var(--line-2); color: var(--text);
+      padding: 11px 18px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      opacity: 0; pointer-events: none; z-index: 50; transition: opacity .22s var(--ease), transform .22s var(--ease);
+      box-shadow: 0 16px 40px -24px rgba(0,0,0,.9);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .jump-nav {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 28px;
+    }
+    .jump-nav a {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim);
+      text-decoration: none; padding: 7px 12px; border-radius: 999px;
+      border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 80%, transparent);
+      transition: color .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+    }
+    .jump-nav a:hover, .jump-nav a:focus-visible { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+    .jump-nav a.is-active {
+      color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight: 500;
+    }
+    .jump-nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    section[id^="section-"] { scroll-margin-top: 20px; }
+
+    .fab-top {
+      position: fixed; right: 20px; bottom: 22px; z-index: 35;
+      width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line-2);
+      background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+      color: var(--text-mid); font-size: 18px; cursor: pointer;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 12px 30px -18px rgba(0,0,0,.9);
+      opacity: 0; transform: translateY(10px); pointer-events: none;
+      transition: opacity .22s var(--ease), transform .22s var(--ease), color .18s var(--ease), border-color .18s var(--ease);
+    }
+    .fab-top.show { opacity: 1; transform: none; pointer-events: auto; }
+    .fab-top:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+    .fab-top:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* scroll-progress prúžok navrchu */
+    .progress {
+      position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      z-index: 40; transition: width .1s linear; box-shadow: 0 0 12px var(--glow);
+    }
+
+    /* prepínač jazyka */
+    .lang {
+      position: fixed; top: 18px; right: 20px;
+      display: inline-flex; background: color-mix(in srgb, var(--surface) 78%, transparent);
+      border: 1px solid var(--line); border-radius: 999px; padding: 3px; z-index: 30;
+      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px -16px rgba(0,0,0,.8);
+    }
+    .lang button {
+      appearance: none; border: none; background: transparent; color: var(--text-dim);
+      padding: 6px 14px; border-radius: 999px; cursor: pointer;
+      font-family: inherit; font-size: inherit;
+      transition: color .18s var(--ease), background .18s var(--ease);
+    }
+    .lang button:hover { color: var(--text-mid); }
+    .lang button.active { background: var(--accent); color: var(--bg); font-weight: 500; }
+    .lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* nábehy */
+    .rise { opacity: 0; transform: translateY(16px); }
+    .loaded .rise { opacity: 1; transform: none; transition: opacity .7s var(--ease), transform .7s var(--ease); }
+    .loaded .rise.d1 { transition-delay: .05s; }
+    .loaded .rise.d2 { transition-delay: .12s; }
+    .loaded .rise.d3 { transition-delay: .19s; }
+    .loaded .rise.d4 { transition-delay: .26s; }
+    .loaded .rise.d5 { transition-delay: .33s; }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+    /* núdzová poistka: ak animácie z akéhokoľvek dôvodu nenabehnú, JS pridá .force a všetko sa zobrazí */
+    body.force .rise, body.force .reveal { opacity: 1 !important; transform: none !important; }
+
+    /* hero */
+    .hero { padding: 92px 0 46px; }
+    .hero-top { display: flex; align-items: center; gap: 18px; margin-bottom: 30px; flex-wrap: wrap; }
+    .avatar {
+      width: 66px; height: 66px; border-radius: 50%;
+      object-fit: cover; border: 1px solid var(--line-2);
+      background: var(--surface-2); flex-shrink: 0;
+    }
+    /* monogram fallback keď nie je fotka */
+    .monogram {
+      width: 66px; height: 66px; border-radius: 50%; flex-shrink: 0;
+      display: grid; place-items: center;
+      font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 24px;
+      color: var(--bg); letter-spacing: -0.02em;
+      background: linear-gradient(140deg, var(--accent), color-mix(in srgb, var(--accent-2) 80%, var(--accent)));
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent), 0 12px 30px -14px var(--glow);
+    }
+    .status {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-mid);
+      background: var(--surface); border: 1px solid var(--line);
+      padding: 7px 14px; border-radius: 999px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
+    .dot.on { background: var(--accent); box-shadow: 0 0 0 0 var(--accent); animation: pulse 2.4s infinite; }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 var(--glow); }
+      70%  { box-shadow: 0 0 0 9px transparent; }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 9.4vw, 92px);
+      font-weight: 700; line-height: 0.95; letter-spacing: -0.038em;
+      color: var(--text); /* bezpečný základ — text je viditeľný vždy */
+    }
+    /* gradientový nadpis len tam, kde ho prehliadač naozaj vie (bez color-mix, nech nič nezneviditeľní) */
+    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+      .hero h1 {
+        background: linear-gradient(180deg, #f4f5f7 55%, #b9bdc7);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+      }
+    }
+    .hero h1 .accent {
+      -webkit-text-fill-color: var(--accent); color: var(--accent);
+    }
+    .hero .role {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(15px, 2.4vw, 19px); color: var(--accent-2); margin-top: 22px;
+    }
+    .hero .bio { font-size: clamp(16px, 2.6vw, 19px); color: var(--text-mid); max-width: 60ch; margin-top: 20px; }
+
+    .links { display: flex; gap: 11px; margin-top: 32px; flex-wrap: wrap; align-items: center; }
+    .links a {
+      font-family: 'JetBrains Mono', monospace; font-size: 14px;
+      padding: 10px 17px; background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius-sm); color: var(--text); text-decoration: none;
+      transition: border-color .18s var(--ease), color .18s var(--ease), transform .18s var(--ease), background .18s var(--ease);
+    }
+    .links a:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+    .links a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .links .share-link {
+      appearance: none; font-family: 'JetBrains Mono', monospace; font-size: 14px;
+      padding: 10px 17px; background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
+      transition: border-color .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+    }
+    .links .share-link:hover { border-color: var(--accent-3); color: var(--accent-3); transform: translateY(-2px); }
+    .links .share-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .links a.cv {
+      background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 500;
+      box-shadow: 0 12px 30px -16px var(--glow);
+    }
+    .links a.cv:hover { color: var(--bg); filter: brightness(1.06); transform: translateY(-2px); }
+
+    /* highlights — štatistiky z dát */
+    .stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 40px;
+    }
+    .stat {
+      background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .stat-num {
+      font-size: clamp(26px, 5vw, 34px); font-weight: 700; letter-spacing: -0.03em; line-height: 1;
+      color: var(--text);
+    }
+    .stat-num .plus { color: var(--accent); }
+    .stat-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.08em; margin-top: 9px;
+    }
+
+    /* sekcie */
+    section { padding-top: 60px; }
+    .sec-head {
+      display: flex; align-items: baseline; gap: 14px; margin-bottom: 28px;
+      border-top: 1px solid var(--line); padding-top: 24px;
+    }
+    .sec-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 500; }
+    .sec-title {
+      font-size: 14px; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .sec-count {
+      margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: var(--text-dim); align-self: center;
+    }
+
+    /* skúsenosti — časová os */
+    .timeline { position: relative; }
+    .timeline::before {
+      content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 1px;
+      background: linear-gradient(var(--line-2), var(--line-2) 70%, transparent);
+    }
+    .exp { display: grid; grid-template-columns: 13px 1fr; gap: 22px; padding: 6px 0 28px; }
+    .exp:last-child { padding-bottom: 0; }
+    .exp-mark {
+      width: 13px; height: 13px; border-radius: 50%; margin-top: 6px;
+      background: var(--bg); border: 2px solid var(--line-2); position: relative; z-index: 1;
+      transition: border-color .22s var(--ease), box-shadow .22s var(--ease);
+    }
+    .exp:hover .exp-mark { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); }
+    .exp.is-current .exp-mark {
+      border-color: var(--accent); background: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent), 0 0 16px var(--glow);
+    }
+    .exp-now {
+      display: inline-block; margin-left: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--bg); background: var(--accent); padding: 2px 8px; border-radius: 999px; font-weight: 500;
+      vertical-align: middle; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .edu.is-current .edu-title::after {
+      content: attr(data-now); margin-left: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--bg); background: var(--accent-3); padding: 2px 8px; border-radius: 999px; font-weight: 500;
+      vertical-align: middle; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .exp-when { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+    .exp-title { font-size: 19px; font-weight: 500; margin-top: 5px; }
+    .exp-company { color: var(--accent-2); font-size: 15px; margin: 2px 0 9px; }
+    .exp-desc { color: var(--text-mid); font-size: 15px; }
+
+    /* projekty */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(248px, 1fr)); gap: 14px; }
+    .project {
+      position: relative; background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--line); box-shadow: var(--shadow);
+      border-radius: var(--radius); padding: 22px; text-decoration: none; color: inherit;
+      overflow: hidden; transition: border-color .22s var(--ease), transform .22s var(--ease), box-shadow .22s var(--ease);
+    }
+    .project::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+      background: radial-gradient(80% 60% at 100% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 60%);
+      transition: opacity .28s var(--ease);
+    }
+    .project::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--accent); transform: scaleY(0); transform-origin: top;
+      transition: transform .28s var(--ease);
+    }
+    .project.featured {
+      border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+      background: linear-gradient(165deg, color-mix(in srgb, var(--accent) 6%, var(--surface)), var(--surface-2));
+    }
+    .project.featured::before { transform: scaleY(1); opacity: .85; }
+    .project-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--bg); background: var(--accent);
+      padding: 3px 8px; border-radius: 999px; font-weight: 500; flex-shrink: 0;
+    }
+    .project:hover { border-color: var(--line-2); transform: translateY(-4px); box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 26px 50px -30px rgba(0,0,0,.9); }
+    .project:hover::before { transform: scaleY(1); }
+    .project:hover::after { opacity: 1; }
+    .project:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .project-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; position: relative; }
+    .project-head-right { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .project-title { font-size: 18px; font-weight: 500; }
+    .project-arrow { font-family: 'JetBrains Mono', monospace; color: var(--text-dim); font-size: 18px; transition: color .22s var(--ease), transform .22s var(--ease); }
+    .project:hover .project-arrow { color: var(--accent); transform: translate(3px,-3px); }
+    .project-desc { color: var(--text-mid); font-size: 15px; margin-top: 9px; position: relative; }
+    .project-tags { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 16px; position: relative; }
+    .project-tags span {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-mid);
+      background: color-mix(in srgb, var(--surface-3) 70%, transparent); border: 1px solid var(--line);
+      padding: 3px 9px; border-radius: 999px;
+    }
+
+    /* schopnosti */
+    .skill-rows { display: flex; flex-direction: column; }
+    .skill {
+      display: flex; align-items: baseline; gap: 16px; padding: 15px 0;
+      border-top: 1px dashed var(--line); transition: padding-left .2s var(--ease);
+    }
+    .skill:first-child { border-top: none; }
+    .skill:hover { padding-left: 6px; }
+    .skill-name { font-size: 17px; font-weight: 500; min-width: 170px; }
+    .skill-name::before { content: "▹ "; color: var(--accent); }
+    .skill-detail { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text-mid); }
+
+    /* vzdelanie */
+    .edu { padding: 18px 0; border-top: 1px solid var(--line); }
+    .edu:first-child { border-top: none; }
+    .edu-when { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+    .edu-title { font-size: 18px; font-weight: 500; margin-top: 4px; }
+    .edu-place { color: var(--accent-2); font-size: 15px; margin: 2px 0 6px; }
+    .edu-desc { color: var(--text-mid); font-size: 15px; }
+
+    /* certifikáty — zoskupené podľa vydavateľa */
+    .cert-group { padding: 22px 0; border-top: 1px solid var(--line); }
+    .cert-group:first-child { border-top: none; padding-top: 4px; }
+    .cert-group-head { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; flex-wrap: wrap; }
+    .cert-issuer-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--cg, var(--accent)); box-shadow: 0 0 10px color-mix(in srgb, var(--cg, var(--accent)) 60%, transparent); }
+    .cert-issuer { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+    .cert-when { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); }
+    .cert-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cg, var(--accent));
+      border: 1px solid color-mix(in srgb, var(--cg, var(--accent)) 40%, var(--line));
+      background: color-mix(in srgb, var(--cg, var(--accent)) 8%, transparent);
+      padding: 2px 8px; border-radius: 999px;
+    }
+    .cert-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 9px; }
+    .cert-chip {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--line); border-radius: var(--radius-xs); padding: 12px 14px;
+      transition: border-color .2s var(--ease), transform .2s var(--ease);
+    }
+    .cert-chip.is-hidden { display: none; }
+    .cert-group.is-expanded .cert-chip.is-hidden { display: flex; }
+    .cert-chip:hover { border-color: color-mix(in srgb, var(--cg, var(--accent)) 55%, var(--line)); transform: translateY(-2px); }
+    a.cert-chip { text-decoration: none; color: inherit; cursor: pointer; }
+    a.cert-chip:hover .cert-name { color: var(--cg, var(--accent)); }
+    .cert-more {
+      margin-top: 10px; appearance: none; border: 1px dashed var(--line-2); background: transparent;
+      color: var(--text-mid); font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      padding: 8px 14px; border-radius: 999px; cursor: pointer;
+      transition: color .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+    }
+    .cert-more:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+    .cert-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .cert-tick { color: var(--cg, var(--accent)); font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.5; flex-shrink: 0; }
+    .cert-name { font-size: 14px; color: var(--text); line-height: 1.4; }
+
+    /* pätička */
+    footer {
+      margin-top: 74px; padding-top: 26px; border-top: 1px solid var(--line);
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim);
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    footer a { color: var(--text-mid); text-decoration: none; transition: color .18s var(--ease); }
+    footer a:hover { color: var(--accent); }
+    .to-top {
+      display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+      background: none; border: none; font: inherit; color: var(--text-dim);
+    }
+    .to-top:hover { color: var(--accent); }
+
+    @media (max-width: 560px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stats .stat:nth-child(3) { grid-column: 1 / -1; }
+      .skill { flex-direction: column; gap: 4px; }
+      .skill-name { min-width: 0; }
+      .hero { padding-top: 80px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .rise, .reveal { opacity: 1 !important; transform: none !important; }
+    }
+
+    /* tlač / uloženie do PDF cez prehliadač */
+    @media print {
+      body { background: #fff; color: #111; padding: 0; }
+      body::before, .lang, .progress, .to-top, .fab-top, .jump-nav, .toast, .cert-more { display: none !important; }
+      .cert-chip.is-hidden { display: flex !important; }
+      .wrap { max-width: 100%; }
+      a { color: #111; }
+      .hero h1 { -webkit-text-fill-color: #111; color: #111; }
+      .reveal, .rise { opacity: 1 !important; transform: none !important; }
+      .project, .status, .stat, .cert-chip { border-color: #ccc; box-shadow: none; background: #fff; }
+      .stats { grid-template-columns: repeat(3,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#app">Preskočiť na obsah / Skip to content</a>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <button type="button" class="fab-top" id="fab-top" aria-label="Späť hore / Back to top" title="Späť hore / Back to top">&#8593;</button>
+
+  <div class="lang" role="group" aria-label="Jazyk / Language">
+    <button id="btn-sk" class="active" onclick="setLang('sk')">SK</button>
+    <button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+
+  <main class="wrap" id="app">
+    <!-- obsah sa vygeneruje z content.js; toto je viditeľný stav pred/bez JS -->
+    <noscript><div style="padding:80px 0;color:#f4f5f7;font:16px/1.6 sans-serif">Táto stránka potrebuje zapnutý JavaScript. / This page requires JavaScript.</div></noscript>
+    <div id="boot" style="padding:80px 0;color:#a7abb5;font:16px/1.6 sans-serif">Načítavam CV… / Loading…</div>
+  </main>
+
+  <!-- DÁTA -->
+  <script src="content.js"></script>
+  <script>
+    // V náhľade z admina (index.html?preview=1) sa použije rozpracovaný koncept
+    (function () {
+      try {
+        var preview = new URLSearchParams(location.search).get('preview');
+        if (preview === '1') {
+          var draft = localStorage.getItem('cv_admin_draft');
+          if (draft) window.CV_DATA = JSON.parse(draft);
+        }
+      } catch (e) {}
+    })();
+
+    var D = window.CV_DATA;
+    var lang = 'sk';
+    var CERT_PREVIEW = 5;
+    var toastTimer;
+    var spyIO;
+    var statsIO;
+
+    // pomocníci
+    function t(v, l) {
+      if (v && typeof v === 'object' && !Array.isArray(v)) return v[l] != null ? v[l] : (v.sk != null ? v.sk : (v.en != null ? v.en : ''));
+      return v != null ? v : '';
+    }
+    function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+    function safeUrl(u) {
+      u = String(u || '').trim();
+      if (/^\s*javascript:/i.test(u)) return '#';
+      return u;
+    }
+    function isExternal(u) { return /^https?:\/\//i.test(u); }
+    function initials(name) {
+      var p = String(name || '').trim().split(/\s+/);
+      return (((p[0] || '')[0] || '') + ((p[1] || '')[0] || '')).toUpperCase() || 'CV';
+    }
+    // slovenské skloňovanie počtu certifikátov: 1 = certifikát, 2–4 = certifikáty, 5+ = certifikátov
+    function plCert(n, l) {
+      if (l === 'sk') return n === 1 ? 'certifikát' : (n >= 2 && n <= 4 ? 'certifikáty' : 'certifikátov');
+      return n === 1 ? 'certificate' : 'certificates';
+    }
+    function getSiteUrl() {
+      var manual = String((D.meta || {}).siteUrl || '').trim().replace(/\/+$/, '');
+      if (manual) return manual;
+      if (location.protocol === 'http:' || location.protocol === 'https:') return location.origin;
+      return '';
+    }
+    function absUrl(path) {
+      var base = getSiteUrl();
+      if (!base || !path) return '';
+      return base + '/' + String(path).replace(/^\/+/, '');
+    }
+    function showToast(msg) {
+      var el = document.getElementById('toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2200);
+    }
+    function updateSeo(m, descTxt) {
+      var site = getSiteUrl();
+      var og = absUrl(m.ogImage || 'og-image.svg');
+      setMeta('meta[property="og:title"]', t(m.title, lang) || m.name, 'content');
+      setMeta('meta[property="og:description"]', descTxt, 'content');
+      setMeta('meta[name="twitter:image"]', og, 'content', 'tw-image');
+      setMeta('meta[property="og:image"]', og, 'content', 'og-image');
+      setMeta('meta[property="og:url"]', site, 'content', 'og-url');
+      setMeta('link#canonical', site, 'href', 'canonical');
+      updateHreflang(site);
+      var old = document.getElementById('ld-person');
+      if (old) old.remove();
+      var links = (D.links || []).map(function (lk) { return safeUrl(lk.url); }).filter(isExternal);
+      var script = document.createElement('script');
+      script.id = 'ld-person';
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: m.name || '',
+        jobTitle: t((D.hero || {}).role, lang),
+        description: descTxt,
+        email: (D.footer || {}).email || undefined,
+        url: site || undefined,
+        image: og || undefined,
+        address: t(m.location, lang) ? { '@type': 'PostalAddress', addressLocality: 'Bratislava', addressCountry: 'SK' } : undefined,
+        sameAs: links.length ? links : undefined
+      });
+      document.head.appendChild(script);
+    }
+    function updateHreflang(site) {
+      ['hreflang-sk', 'hreflang-en', 'hreflang-x'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.remove();
+      });
+      if (!site) return;
+      [['sk', 'hreflang-sk'], ['en', 'hreflang-en'], ['x-default', 'hreflang-x']].forEach(function (pair) {
+        var link = document.createElement('link');
+        link.id = pair[1];
+        link.rel = 'alternate';
+        link.hreflang = pair[0];
+        link.href = site + (location.search || '');
+        document.head.appendChild(link);
+      });
+    }
+
+    function render() {
+      var m = D.meta || {};
+      // farby + metadáta
+      var root = document.documentElement.style;
+      if (m.accent)  root.setProperty('--accent', m.accent);
+      if (m.accent2) root.setProperty('--accent-2', m.accent2);
+      if (m.accent3) root.setProperty('--accent-3', m.accent3);
+      var tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute('content', getComputedStyle(document.body).backgroundColor || '#0a0b0d');
+      document.title = t(m.title, lang) || (m.name || 'Portfólio');
+      var descTxt = t(m.description, lang);
+      setMeta('meta[name="description"]', descTxt);
+      updateSeo(m, descTxt);
+
+      var h = D.hero || {};
+      var name = esc(m.name || 'Tvoje meno');
+      // meno rozdelíme na riadky podľa medzier (max 2 riadky pôsobia najlepšie)
+      var parts = (m.name || 'Tvoje meno').trim().split(/\s+/);
+      var nameHtml;
+      if (parts.length >= 2) {
+        var mid = Math.ceil(parts.length / 2);
+        nameHtml = esc(parts.slice(0, mid).join(' ')) + '<br>' + esc(parts.slice(mid).join(' '));
+      } else { nameHtml = name; }
+
+      // favicon z monogramu
+      updateFavicon(initials(m.name), (m.accent || '#d6ff4b'));
+
+      var html = '';
+      html += '<header class="hero">';
+      html += '<div class="hero-top">';
+      if (m.photo) {
+        html += '<img class="avatar rise d1" src="' + esc(safeUrl(m.photo)) + '" alt="' + name + '">';
+      } else {
+        html += '<div class="monogram rise d1" aria-hidden="true">' + esc(initials(m.name)) + '</div>';
+      }
+      html += '<div class="status rise d1"><span class="dot ' + (h.available ? 'on' : '') + '"></span>'
+            + '<span class="mono">&gt; ' + esc(t(h.status, lang)) + '</span></div>';
+      if (t(m.location, lang)) html += '<span class="status rise d1" style="color:var(--text-dim)"><span class="mono">' + esc(t(m.location, lang)) + '</span></span>';
+      html += '</div>';
+
+      html += '<h1 class="rise d2">' + nameHtml + '<span class="accent">.</span></h1>';
+      if (t(h.role, lang)) html += '<div class="role rise d3">// ' + esc(t(h.role, lang)) + '</div>';
+      if (t(h.bio, lang))  html += '<p class="bio rise d3">' + esc(t(h.bio, lang)) + '</p>';
+
+      // odkazy
+      var links = D.links || [];
+      html += '<nav class="links rise d4">';
+      links.forEach(function (lk) {
+        var label = esc(t(lk.label, lang));
+        var url = safeUrl(lk.url);
+        var ext = isExternal(url) ? ' target="_blank" rel="noopener"' : '';
+        var arrow = isExternal(url) ? ' &#8599;' : '';
+        html += '<a href="' + esc(url) + '"' + ext + '>' + label + arrow + '</a>';
+      });
+      if (m.cvFile && !/tvoje-domena/.test(m.cvFile)) {
+        html += '<a class="cv" href="' + esc(safeUrl(m.cvFile)) + '" target="_blank" rel="noopener">'
+              + (lang === 'sk' ? 'Stiahnuť CV (PDF)' : 'Download CV (PDF)') + ' &#8595;</a>';
+      }
+      html += '<button type="button" class="share-link">' + (lang === 'sk' ? 'zdieľať' : 'share') + ' &#128279;</button>';
+      html += '</nav>';
+
+      // highlights / štatistiky z dát
+      html += renderStats();
+
+      html += renderJumpNav();
+
+      html += '</header>';
+
+      // sekcie podľa poradia
+      var sec = D.sections || {};
+      var order = (sec.order || ['experience', 'projects', 'skills', 'education', 'certificates']);
+      var num = 0;
+      order.forEach(function (key) {
+        var cfg = sec[key];
+        if (!cfg || cfg.show === false) return;
+        var items = D[key] || [];
+        if (!items.length) return;
+        num++;
+        var n = (num < 10 ? '0' : '') + num;
+        html += '<section class="reveal" id="section-' + esc(key) + '"><div class="sec-head"><span class="sec-num">' + n + '</span>'
+              + '<span class="sec-title">' + esc(t(cfg.label, lang)) + '</span>'
+              + '<span class="sec-count">' + items.length + '</span></div>';
+        html += renderSection(key, items);
+        html += '</section>';
+      });
+
+      // pätička
+      var f = D.footer || {};
+      html += '<footer class="reveal"><span>&copy; ' + new Date().getFullYear() + ' ' + name + '</span>';
+      html += '<span style="display:inline-flex;gap:18px;align-items:center">';
+      if (f.email) html += '<a href="mailto:' + esc(f.email) + '" class="copy-email" data-email="' + esc(f.email) + '">' + esc(f.email) + '</a>';
+      html += '<button class="to-top" onclick="window.scrollTo({top:0,behavior:\'smooth\'})">' + (lang === 'sk' ? 'hore' : 'top') + ' &#8593;</button>';
+      html += '</span></footer>';
+
+      document.getElementById('app').innerHTML = html;
+
+      // jazyk tlačidlá + html lang
+      document.documentElement.lang = lang;
+      document.getElementById('btn-sk').classList.toggle('active', lang === 'sk');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+      observeReveals();
+      observeScrollSpy();
+      observeStats();
+      bindInteractions();
+    }
+
+    function setMeta(sel, val, attr, id) {
+      var el = id ? document.getElementById(id) : document.querySelector(sel);
+      if (el) el.setAttribute(attr || 'content', val || '');
+    }
+
+    function renderJumpNav() {
+      var sec = D.sections || {};
+      var order = (sec.order || ['experience', 'projects', 'skills', 'education', 'certificates']);
+      var items = [];
+      order.forEach(function (key) {
+        var cfg = sec[key];
+        if (!cfg || cfg.show === false) return;
+        var data = D[key] || [];
+        if (!data.length) return;
+        items.push('<a href="#section-' + esc(key) + '" data-section="' + esc(key) + '">' + esc(t(cfg.label, lang)) + '</a>');
+      });
+      if (items.length < 2) return '';
+      return '<nav class="jump-nav rise d5" aria-label="' + (lang === 'sk' ? 'Sekcie' : 'Sections') + '">' + items.join('') + '</nav>';
+    }
+
+    function renderStats() {
+      var cells = [];
+      var exp = (D.experience || []).length;
+      var proj = (D.projects || []).length;
+      var certs = (D.certificates || []).length;
+      if (exp)  cells.push({ n: exp, label: lang === 'sk' ? 'Pracovné skúsenosti' : 'Work experiences' });
+      if (certs) cells.push({ n: certs, plus: true, label: lang === 'sk' ? 'Certifikátov' : 'Certificates' });
+      if (proj) cells.push({ n: proj, label: lang === 'sk' ? 'Projekty' : 'Projects' });
+      if (cells.length < 2) return '';
+      var s = '<div class="stats rise d5">';
+      cells.forEach(function (c) {
+        s += '<div class="stat"><div class="stat-num" data-target="' + c.n + '"><span class="stat-val">0</span>' + (c.plus ? '<span class="plus">+</span>' : '') + '</div>'
+           + '<div class="stat-label">' + esc(c.label) + '</div></div>';
+      });
+      return s + '</div>';
+    }
+
+    function renderSection(key, items) {
+      if (key === 'experience') {
+        var s = '<div class="timeline">';
+        items.forEach(function (j) {
+          var cur = j.current ? ' is-current' : '';
+          var now = j.current ? '<span class="exp-now">' + (lang === 'sk' ? 'teraz' : 'now') + '</span>' : '';
+          s += '<article class="exp' + cur + '"><div class="exp-mark"></div><div>'
+             + '<div class="exp-when">' + esc(t(j.when, lang)) + now + '</div>'
+             + '<div class="exp-title">' + esc(t(j.title, lang)) + '</div>'
+             + '<div class="exp-company">' + esc(t(j.company, lang)) + '</div>'
+             + '<p class="exp-desc">' + esc(t(j.desc, lang)) + '</p>'
+             + '</div></article>';
+        });
+        return s + '</div>';
+      }
+      if (key === 'projects') {
+        var s = '<div class="grid">';
+        items.forEach(function (p) {
+          var url = safeUrl(p.url);
+          var ext = isExternal(url) ? ' target="_blank" rel="noopener"' : '';
+          var tags = (p.tags || []).map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
+          var tag = url ? 'a' : 'div';
+          var href = url ? ' href="' + esc(url) + '"' + ext : '';
+          var feat = p.featured ? ' featured' : '';
+          var badge = p.featured ? '<span class="project-badge">' + (lang === 'sk' ? 'Hlavný' : 'Featured') + '</span>' : '';
+          s += '<' + tag + ' class="project' + feat + '"' + href + '>'
+             + '<div class="project-head"><span class="project-title">' + esc(t(p.title, lang)) + '</span>'
+             + ((badge || url) ? '<span class="project-head-right">' + badge + (url ? '<span class="project-arrow">&#8599;</span>' : '') + '</span>' : '') + '</div>'
+             + '<p class="project-desc">' + esc(t(p.desc, lang)) + '</p>'
+             + (tags ? '<div class="project-tags">' + tags + '</div>' : '')
+             + '</' + tag + '>';
+        });
+        return s + '</div>';
+      }
+      if (key === 'skills') {
+        var s = '<div class="skill-rows">';
+        items.forEach(function (sk) {
+          s += '<div class="skill"><span class="skill-name">' + esc(t(sk.name, lang)) + '</span>'
+             + '<span class="skill-detail">' + esc(t(sk.detail, lang)) + '</span></div>';
+        });
+        return s + '</div>';
+      }
+      if (key === 'education') {
+        var s = '<div class="edu-list">';
+        items.forEach(function (e) {
+          var cur = e.current ? ' is-current' : '';
+          var now = e.current ? (lang === 'sk' ? 'študujem' : 'studying') : '';
+          s += '<article class="edu' + cur + '">'
+             + '<div class="edu-when">' + esc(t(e.when, lang)) + '</div>'
+             + '<div class="edu-title"' + (now ? ' data-now="' + esc(now) + '"' : '') + '>' + esc(t(e.title, lang)) + '</div>'
+             + '<div class="edu-place">' + esc(t(e.place, lang)) + '</div>'
+             + (t(e.desc, lang) ? '<p class="edu-desc">' + esc(t(e.desc, lang)) + '</p>' : '')
+             + '</article>';
+        });
+        return s + '</div>';
+      }
+      if (key === 'certificates') {
+        // zoskupenie podľa vydavateľa, poradie = prvý výskyt
+        var groups = [], byIssuer = {};
+        items.forEach(function (c) {
+          var iss = t(c.issuer, lang) || (lang === 'sk' ? 'Ostatné' : 'Other');
+          if (!byIssuer[iss]) { byIssuer[iss] = { issuer: iss, whens: {}, items: [] }; groups.push(byIssuer[iss]); }
+          byIssuer[iss].items.push(c);
+          var w = t(c.when, lang); if (w) byIssuer[iss].whens[w] = true;
+        });
+        var palette = ['var(--accent-2)', 'var(--accent-3)', 'var(--accent)'];
+        var s = '';
+        groups.forEach(function (g, gi) {
+          var col = palette[gi % palette.length];
+          var whens = Object.keys(g.whens);
+          var whenTxt = whens.length === 1 ? whens[0] : (whens.length ? whens[whens.length - 1] + ' – ' + whens[0] : '');
+          var word = plCert(g.items.length, lang);
+          s += '<div class="cert-group" style="--cg:' + col + '">'
+             + '<div class="cert-group-head">'
+             + '<span class="cert-issuer-dot"></span>'
+             + '<span class="cert-issuer">' + esc(g.issuer) + '</span>'
+             + '<span class="cert-badge">' + g.items.length + ' ' + word + '</span>'
+             + (whenTxt ? '<span class="cert-when">' + esc(whenTxt) + '</span>' : '')
+             + '</div><div class="cert-chips">';
+          g.items.forEach(function (c, ci) {
+            var hidden = ci >= CERT_PREVIEW ? ' is-hidden' : '';
+            var curl = safeUrl(c.url);
+            var chipTag = curl ? 'a' : 'div';
+            var chipHref = curl ? ' href="' + esc(curl) + '" target="_blank" rel="noopener"' : '';
+            s += '<' + chipTag + ' class="cert-chip' + hidden + '"' + chipHref + '><span class="cert-tick">&#10003;</span>'
+               + '<span class="cert-name">' + esc(t(c.title, lang)) + (curl ? ' &#8599;' : '') + '</span></' + chipTag + '>';
+          });
+          if (g.items.length > CERT_PREVIEW) {
+            var more = g.items.length - CERT_PREVIEW;
+            s += '<button type="button" class="cert-more" data-more="' + more + '">'
+               + (lang === 'sk' ? 'Zobraziť ďalších ' + more : 'Show ' + more + ' more') + '</button>';
+          }
+          s += '</div></div>';
+        });
+        return s;
+      }
+      return '';
+    }
+
+    // favicon z monogramu + zvolenej farby
+    function updateFavicon(init, accent) {
+      try {
+        var link = document.getElementById('favicon');
+        if (!link) return;
+        var svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>"
+                + "<rect width='64' height='64' rx='14' fill='#0a0b0d'/>"
+                + "<text x='32' y='45' font-family='monospace' font-size='32' font-weight='700' fill='" + accent + "' text-anchor='middle'>" + init + "</text></svg>";
+        link.setAttribute('href', 'data:image/svg+xml,' + encodeURIComponent(svg));
+      } catch (e) {}
+    }
+
+    var io;
+    function observeReveals() {
+      // poistka: bez IntersectionObserver zobraz sekcie rovno (nikdy nesmú zostať skryté)
+      if (!window.IntersectionObserver) {
+        document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+        return;
+      }
+      if (io) io.disconnect();
+      io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+    }
+
+    function observeScrollSpy() {
+      if (spyIO) spyIO.disconnect();
+      var links = document.querySelectorAll('.jump-nav a[data-section]');
+      if (!links.length || !window.IntersectionObserver) return;
+      var map = {};
+      links.forEach(function (a) { map[a.getAttribute('data-section')] = a; });
+      var visible = {};
+      spyIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { visible[e.target.id] = e.isIntersecting; });
+        var activeId = null;
+        document.querySelectorAll('section[id^="section-"]').forEach(function (sec) {
+          if (visible[sec.id]) activeId = sec.id;
+        });
+        links.forEach(function (a) { a.classList.remove('is-active'); });
+        if (activeId) {
+          var key = activeId.replace('section-', '');
+          if (map[key]) map[key].classList.add('is-active');
+        }
+      }, { rootMargin: '-42% 0px -48% 0px', threshold: 0 });
+      document.querySelectorAll('section[id^="section-"]').forEach(function (s) { spyIO.observe(s); });
+    }
+
+    function observeStats() {
+      if (statsIO) statsIO.disconnect();
+      var box = document.querySelector('.stats');
+      if (!box || !window.IntersectionObserver) {
+        document.querySelectorAll('.stat-val').forEach(function (el) {
+          var n = el.parentElement && el.parentElement.getAttribute('data-target');
+          if (n) el.textContent = n;
+        });
+        return;
+      }
+      statsIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          statsIO.unobserve(e.target);
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            e.target.querySelectorAll('.stat-val').forEach(function (el) {
+              el.textContent = el.parentElement.getAttribute('data-target') || '0';
+            });
+            return;
+          }
+          e.target.querySelectorAll('.stat-num').forEach(function (num) {
+            var target = parseInt(num.getAttribute('data-target') || '0', 10);
+            var val = num.querySelector('.stat-val');
+            if (!val || !target) return;
+            var t0 = performance.now();
+            function tick(now) {
+              var p = Math.min(1, (now - t0) / 700);
+              val.textContent = String(Math.round(target * (1 - Math.pow(1 - p, 3))));
+              if (p < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+          });
+        });
+      }, { threshold: 0.35 });
+      statsIO.observe(box);
+    }
+
+    // scroll-progress + plávajúce tlačidlo hore
+    function onScroll() {
+      var st = document.documentElement.scrollTop || document.body.scrollTop;
+      var h = (document.documentElement.scrollHeight - document.documentElement.clientHeight) || 1;
+      var p = Math.min(100, Math.max(0, (st / h) * 100));
+      var bar = document.getElementById('progress'); if (bar) bar.style.width = p + '%';
+      var fab = document.getElementById('fab-top');
+      if (fab) fab.classList.toggle('show', st > 420);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    function bindInteractions() {
+      document.querySelectorAll('.cert-more').forEach(function (btn) {
+        btn.onclick = function () {
+          var group = btn.closest('.cert-group');
+          if (!group) return;
+          var expanded = group.classList.toggle('is-expanded');
+          var more = btn.getAttribute('data-more') || '';
+          btn.textContent = expanded
+            ? (lang === 'sk' ? 'Zobraziť menej' : 'Show less')
+            : (lang === 'sk' ? 'Zobraziť ďalších ' + more : 'Show ' + more + ' more');
+        };
+      });
+      var fab = document.getElementById('fab-top');
+      if (fab) fab.onclick = function () { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+      document.querySelectorAll('.share-link').forEach(function (btn) {
+        btn.onclick = function () {
+          var url = getSiteUrl() ? getSiteUrl() + location.pathname + location.search : location.href;
+          var done = function () { showToast(lang === 'sk' ? 'Odkaz skopírovaný' : 'Link copied'); };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(done).catch(function () { showToast(url); });
+          } else {
+            showToast(url);
+          }
+        };
+      });
+
+      document.querySelectorAll('.copy-email').forEach(function (el) {
+        el.onclick = function (e) {
+          var email = el.getAttribute('data-email') || '';
+          if (!email) return;
+          e.preventDefault();
+          var done = function () {
+            showToast(lang === 'sk' ? 'E-mail skopírovaný' : 'Email copied');
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(email).then(done).catch(function () { window.location.href = 'mailto:' + email; });
+          } else {
+            window.location.href = 'mailto:' + email;
+          }
+        };
+      });
+    }
+
+    function setLang(l) {
+      lang = l;
+      try { localStorage.setItem('lang', l); sessionStorage.setItem('lang', l); } catch (e) {}
+      render();
+      onScroll();
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      if (e.key === 'e' || e.key === 'E') setLang('en');
+      if (e.key === 's' || e.key === 'S') setLang('sk');
+    });
+
+    // štart
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('lang') || sessionStorage.getItem('lang'); } catch (e) {}
+      if (saved === 'en' || saved === 'sk') lang = saved;
+      // záchytka: akákoľvek chyba pri štarte sa zobrazí na stránke, nikdy nie čierna obrazovka
+      try {
+        if (!window.CV_DATA) throw new Error('content.js sa nenačítal — musí byť v rovnakom priečinku ako index.html');
+        render();
+      } catch (err) {
+        document.getElementById('app').innerHTML =
+          '<div style="padding:80px 0;color:#f4f5f7;font:16px/1.6 sans-serif">'
+          + '<strong style="color:#ff9d54">Obsah sa nepodarilo načítať.</strong><br><br>'
+          + '<code style="color:#a7abb5;font-size:14px">' + esc(String(err && err.message ? err.message : err)) + '</code></div>';
+        return;
+      }
+      onScroll();
+      // nábehové animácie spustíme hneď po prvom vykreslení — nečakáme na 'load'
+      // (pomalé Google Fonts by inak držali stránku neviditeľnú)
+      function markLoaded() { document.body.classList.add('loaded'); }
+      if (window.requestAnimationFrame) {
+        requestAnimationFrame(function () { requestAnimationFrame(markLoaded); });
+      } else {
+        markLoaded();
+      }
+      // poistka pre každý prípad
+      setTimeout(markLoaded, 400);
+      // núdzová poistka: ak je po 1.4 s niečo vo viewporte stále neviditeľné
+      // (zaseknuté animácie, starý prehliadač...), zobraz všetko natvrdo
+      setTimeout(function () {
+        var stuck = false;
+        document.querySelectorAll('.rise, .reveal').forEach(function (el) {
+          var r = el.getBoundingClientRect();
+          var inView = r.top < window.innerHeight && r.bottom > 0;
+          if (inView && getComputedStyle(el).opacity === '0') stuck = true;
+        });
+        if (stuck) document.body.classList.add('force');
+      }, 1400);
+    })();
+  </script>
+</body>
+</html>
