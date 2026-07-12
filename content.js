@@ -81,7 +81,7 @@ window.CV_DATA = {
     {
       title: { sk: "Toto portfólio (cvonline)", en: "This Portfolio (cvonline)" },
       desc: { sk: "Statické dvojjazyčné CV/portfólio bez frameworku — obsah v jednom súbore, tmavý dizajn, SEO, tlač do PDF a pripravené na bezplatný hosting.", en: "Static bilingual CV/portfolio without a framework — content in a single file, dark design, SEO, print-to-PDF and ready for free hosting." },
-      url: "https://github.com/Apoliak7777",
+      url: "https://github.com/Apoliak7777/Apoliak-CV-online",
       tags: ["HTML", "CSS", "JavaScript", "Open Source"]
     },
     {
