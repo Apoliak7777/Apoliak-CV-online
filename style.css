@@ -598,7 +598,13 @@ body::after {
   background: conic-gradient(from 0deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent));
   animation: spin 9s linear infinite;
 }
-.monogram::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; z-index: -1; background: var(--bg); }
+/* stred prstenca — musí niesť gradient monogramu, nie farbu pozadia:
+   .monogram má isolation: isolate, takže z-index:-1 nejde ZA jeho pozadie,
+   ale nad neho, a čierna výplň by prekryla gradient aj čierne písmená */
+.monogram::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; z-index: -1;
+  background: linear-gradient(140deg, var(--accent), color-mix(in srgb, var(--accent-2) 80%, var(--accent)));
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes breathe {
   0%, 100% { box-shadow: 0 14px 34px -14px var(--glow); }
