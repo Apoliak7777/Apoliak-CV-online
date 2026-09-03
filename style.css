@@ -501,11 +501,7 @@ footer a:hover { color: var(--accent); }
   background: linear-gradient(165deg, color-mix(in srgb, var(--accent) 5%, var(--surface)), var(--surface-2));
   transform: translateY(-3px);
 }
-.proj-card.featured { border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); }
-.proj-card.featured::before {
-  content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 2px;
-  border-radius: 2px; background: var(--accent);
-}
+.proj-card.featured { box-shadow: var(--shadow), inset 2px 0 0 var(--accent); }
 .proj-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .proj-name { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; }
 .proj-badge {
@@ -560,6 +556,145 @@ footer a:hover { color: var(--accent); }
   .proj-grid { grid-template-columns: 1fr; }
 }
 
+
+/* ============================================================================
+   DIZAJNOVÁ VRSTVA — nadstavba nad základným systémom
+   Nič z tohto nemení rozloženie; je to atmosféra, textúra a detaily.
+   ============================================================================ */
+
+/* --- tmavý scrollbar: systémový svetlý na tmavej stránke trčí --- */
+html { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 999px; border: 3px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* --- aurora: tri rozmazané škvrny v paletových farbách, ktoré pomaly driftujú.
+       mix-blend-mode: screen ich na tmavom podklade sčíta do svetla, nie do mliečna --- */
+.aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.aurora span {
+  position: absolute; border-radius: 50%; filter: blur(90px);
+  mix-blend-mode: screen; will-change: transform;
+}
+.aurora span:nth-child(1) { width: 560px; height: 560px; left: -14%; top: -20%; background: var(--accent);   opacity: .16; animation: drift-a 26s ease-in-out infinite alternate; }
+.aurora span:nth-child(2) { width: 480px; height: 480px; right: -12%; top: -14%; background: var(--accent-2); opacity: .12; animation: drift-b 32s ease-in-out infinite alternate; }
+.aurora span:nth-child(3) { width: 440px; height: 440px; left: 38%; top: 58%; background: var(--accent-3);   opacity: .08; animation: drift-c 38s ease-in-out infinite alternate; }
+@keyframes drift-a { to { transform: translate(90px, 70px) scale(1.12); } }
+@keyframes drift-b { to { transform: translate(-80px, 90px) scale(.94); } }
+@keyframes drift-c { to { transform: translate(70px, -80px) scale(1.08); } }
+
+/* --- zrno: jemná textúra cez celú stránku, aby plochy neboli sterilne hladké --- */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  opacity: .03; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* --- monogram: rotujúci prstenec v troch farbách palety + dýchajúca žiara --- */
+.monogram { position: relative; isolation: isolate; box-shadow: 0 14px 34px -14px var(--glow); animation: breathe 5s ease-in-out infinite; }
+.monogram::before {
+  content: ""; position: absolute; inset: -4px; border-radius: 50%; z-index: -1;
+  background: conic-gradient(from 0deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent));
+  animation: spin 9s linear infinite;
+}
+.monogram::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; z-index: -1; background: var(--bg); }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 14px 34px -14px var(--glow); }
+  50%      { box-shadow: 0 16px 44px -12px var(--glow); }
+}
+
+/* --- bodka za menom svieti --- */
+.hero h1 .accent { text-shadow: 0 0 26px var(--glow); }
+
+/* --- štatistiky: každá vo svojej farbe palety, číslo s jemným tónom --- */
+.stat { position: relative; transition: transform .22s var(--ease), box-shadow .22s var(--ease); }
+.stat:nth-child(1) { --sc: var(--accent); }
+.stat:nth-child(2) { --sc: var(--accent-3); }
+.stat:nth-child(3) { --sc: var(--accent-2); }
+.stat:hover { transform: translateY(-3px); box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 26px 50px -30px rgba(0,0,0,.9), 0 0 0 1px color-mix(in srgb, var(--sc) 25%, transparent); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .stat-num {
+    background: linear-gradient(180deg, var(--text) 40%, color-mix(in srgb, var(--sc, var(--accent)) 55%, var(--text)));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .stat-num .plus { -webkit-text-fill-color: var(--sc, var(--accent)); color: var(--sc, var(--accent)); }
+}
+
+/* --- gradientové rámy: hrana svetlejšia vľavo hore, do akcentu vpravo dole.
+       Rám je pseudo-element s 1px paddingom a maskou, ktorá nechá len okraj.
+       Pri hoveri sa cez neho prelína druhý, akcentový rám. --- */
+.interest { --sc: var(--accent-3); position: relative; background: linear-gradient(180deg, var(--surface), var(--surface-2)); }
+@supports ((-webkit-mask-composite: xor) or (mask-composite: exclude)) {
+  .stat, .interest, .proj-card { border-color: transparent; }
+  .stat::before, .stat::after,
+  .interest::before, .interest::after,
+  .proj-card::before, .proj-card::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    pointer-events: none;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+  }
+  .stat::before, .interest::before, .proj-card::before {
+    background: linear-gradient(135deg,
+      rgba(255,255,255,.16), rgba(255,255,255,.05) 35%, rgba(255,255,255,.03) 65%,
+      color-mix(in srgb, var(--sc, var(--accent)) 24%, transparent));
+  }
+  .stat::after, .interest::after, .proj-card::after {
+    opacity: 0; transition: opacity .28s var(--ease);
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--sc, var(--accent)) 60%, transparent), rgba(255,255,255,.09) 45%,
+      color-mix(in srgb, var(--sc, var(--accent)) 45%, transparent));
+  }
+  .stat:hover::after, .interest:hover::after, .proj-card:hover::after { opacity: 1; }
+}
+
+/* --- časová os: hore rozsvietená akcentom, dole dohasína --- */
+.timeline::before {
+  background: linear-gradient(var(--accent) 0, color-mix(in srgb, var(--accent) 35%, var(--line-2)) 10%, var(--line-2) 28%, var(--line-2) 70%, transparent);
+}
+
+/* --- schopnosti: názov sa pri hoveri rozsvieti --- */
+.skill-name { transition: color .18s var(--ease); }
+.skill:hover .skill-name { color: var(--accent); }
+
+/* --- jump-nav: aktívna položka má žiaru --- */
+.jump-nav a.is-active { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent), 0 8px 22px -12px var(--glow); }
+
+/* --- certifikáty: každý chip nesie farbu svojho vydavateľa na ľavej hrane --- */
+.cert-chip { box-shadow: inset 2px 0 0 color-mix(in srgb, var(--cg, var(--accent)) 50%, transparent); transition: border-color .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease); }
+.cert-chip:hover { box-shadow: inset 2px 0 0 var(--cg, var(--accent)); }
+
+/* --- karta projektu na hlavnej: hover má aj farebnú žiaru --- */
+.project:hover { box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 26px 50px -30px rgba(0,0,0,.9), 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), 0 18px 40px -24px var(--glow); }
+
+/* --- pätička: namiesto plnej linky gradientová vlásočnica s akcentom v strede --- */
+footer { border-top: none; position: relative; }
+footer::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-2) 25%, color-mix(in srgb, var(--accent) 45%, var(--line-2)) 50%, var(--line-2) 75%, transparent);
+}
+
+/* --- nadpis podstránky v rovnakom gradiente ako meno v hero --- */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .page-head h1 {
+    background: linear-gradient(180deg, #f4f5f7 55%, #b9bdc7);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .page-head h1 .accent { -webkit-text-fill-color: var(--accent); color: var(--accent); text-shadow: 0 0 26px var(--glow); }
+}
+
+/* --- mobil: menej rozmazania, tretia škvrna preč --- */
+@media (max-width: 560px) {
+  .aurora span { filter: blur(60px); }
+  .aurora span:nth-child(3) { display: none; }
+}
+
 /* tlač / uloženie do PDF cez prehliadač */
 /* ---- tlač do PDF ----------------------------------------------------
    Nie holý text: paleta sa len preloží do tlačovej verzie (akcenty stmavené,
@@ -583,8 +718,16 @@ footer a:hover { color: var(--accent); }
     color: var(--text); padding: 0; font-size: 10.5pt;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
-  body::before, .lang, .to-top, .fab-top, .jump-nav, .toast,
+  body::before, body::after, .aurora, .lang, .to-top, .fab-top, .jump-nav, .toast,
   .cert-more, .print-cv, .skip { display: none !important; }
+  .monogram::before, .monogram::after,
+  .stat::before, .stat::after, .interest::before, .interest::after,
+  .proj-card::before, .proj-card::after, footer::before { display: none !important; }
+  .monogram { animation: none !important; }
+  .stat, .interest, .proj-card { border-color: var(--line) !important; }
+  footer { border-top: 1px solid var(--line) !important; }
+  .stat-num, .page-head h1 { -webkit-text-fill-color: var(--text) !important; color: var(--text) !important; }
+  .hero h1 .accent, .page-head h1 .accent { text-shadow: none !important; }
   .cert-chip.is-hidden { display: flex !important; }
   .wrap { max-width: 100%; }
   .reveal, .rise, .r-item, .sec-num { opacity: 1 !important; transform: none !important; animation: none !important; }
