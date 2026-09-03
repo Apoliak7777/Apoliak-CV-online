@@ -369,6 +369,17 @@
     .skill-name::before { content: "▹ "; color: var(--accent); }
     .skill-detail { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text-mid); }
 
+    /* záujmy */
+    .interest-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    .interest {
+      padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+      background: var(--surface); transition: border-color .2s var(--ease), transform .2s var(--ease);
+    }
+    .interest:hover { border-color: color-mix(in srgb, var(--accent-3) 45%, var(--line)); transform: translateY(-2px); }
+    .interest-name { font-size: 16px; font-weight: 500; }
+    .interest-name::before { content: "◆ "; color: var(--accent-3); font-size: 12px; }
+    .interest-detail { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-mid); margin-top: 6px; line-height: 1.55; }
+
     /* vzdelanie */
     .edu { padding: 18px 0; border-top: 1px solid var(--line); }
     .edu:first-child { border-top: none; }
@@ -450,7 +461,7 @@
       a { color: #111; }
       .hero h1 { -webkit-text-fill-color: #111; color: #111; }
       .reveal, .rise { opacity: 1 !important; transform: none !important; }
-      .project, .status, .stat, .cert-chip { border-color: #ccc; box-shadow: none; background: #fff; }
+      .project, .status, .stat, .cert-chip, .interest { border-color: #ccc; box-shadow: none; background: #fff; }
       .stats { grid-template-columns: repeat(3,1fr); }
     }
   </style>
@@ -514,6 +525,44 @@
     function plCert(n, l) {
       if (l === 'sk') return n === 1 ? 'certifikát' : (n >= 2 && n <= 4 ? 'certifikáty' : 'certifikátov');
       return n === 1 ? 'certificate' : 'certificates';
+    }
+
+    /* Rozsah dátumov skupiny certifikátov.
+       Zo zoznamu textov ako "Máj 2026" / "Október – November 2025" / "December 2025 – Január 2026"
+       zloží jeden úhľadný rozsah ("Október 2025 – Január 2026"). Mesiac bez roka preberá
+       najbližší rok napravo. Ak sa nič nerozparsuje, vráti prvý text nezmenený. */
+    var MONTHS = {
+      sk: ['Január','Február','Marec','Apríl','Máj','Jún','Júl','August','September','Október','November','December'],
+      en: ['January','February','March','April','May','June','July','August','September','October','November','December']
+    };
+    function certRange(whens, l) {
+      var names = MONTHS[l] || MONTHS.sk;
+      var pts = [];
+      whens.forEach(function (w) {
+        var toks = [], re = /(\d{4})|([\p{L}]+)/gu, mm;
+        while ((mm = re.exec(w)) !== null) {
+          if (mm[1]) { toks.push({ year: parseInt(mm[1], 10) }); continue; }
+          var word = mm[2].toLowerCase();
+          ['sk', 'en'].forEach(function (k) {
+            var i = MONTHS[k].findIndex(function (n) { return n.toLowerCase() === word; });
+            if (i >= 0 && !toks.some(function (x) { return x.pending && x.month === i; })) toks.push({ pending: true, month: i });
+          });
+        }
+        // mesiacu priradíme najbližší rok napravo, inak posledný rok v reťazci
+        var lastYear = null;
+        toks.forEach(function (x) { if (x.year != null) lastYear = x.year; });
+        for (var i = 0; i < toks.length; i++) {
+          if (!toks[i].pending) continue;
+          var y = null;
+          for (var j = i + 1; j < toks.length; j++) { if (toks[j].year != null) { y = toks[j].year; break; } }
+          if (y == null) y = lastYear;
+          if (y != null) pts.push(y * 12 + toks[i].month);
+        }
+      });
+      if (!pts.length) return whens[0] || '';
+      var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts);
+      function fmt(v) { return names[v % 12] + ' ' + Math.floor(v / 12); }
+      return lo === hi ? fmt(lo) : fmt(lo) + ' – ' + fmt(hi);
     }
     function getSiteUrl() {
       var manual = String((D.meta || {}).siteUrl || '').trim().replace(/\/+$/, '');
@@ -649,7 +698,7 @@
 
       // sekcie podľa poradia
       var sec = D.sections || {};
-      var order = (sec.order || ['experience', 'projects', 'skills', 'education', 'certificates']);
+      var order = (sec.order || ['experience', 'projects', 'skills', 'education', 'certificates', 'interests']);
       var num = 0;
       order.forEach(function (key) {
         var cfg = sec[key];
@@ -693,7 +742,7 @@
 
     function renderJumpNav() {
       var sec = D.sections || {};
-      var order = (sec.order || ['experience', 'projects', 'skills', 'education', 'certificates']);
+      var order = (sec.order || ['experience', 'projects', 'skills', 'education', 'certificates', 'interests']);
       var items = [];
       order.forEach(function (key) {
         var cfg = sec[key];
@@ -765,6 +814,15 @@
         });
         return s + '</div>';
       }
+      if (key === 'interests') {
+        var s = '<div class="interest-grid">';
+        items.forEach(function (it) {
+          s += '<div class="interest"><div class="interest-name">' + esc(t(it.name, lang)) + '</div>'
+             + (t(it.detail, lang) ? '<div class="interest-detail">' + esc(t(it.detail, lang)) + '</div>' : '')
+             + '</div>';
+        });
+        return s + '</div>';
+      }
       if (key === 'education') {
         var s = '<div class="edu-list">';
         items.forEach(function (e) {
@@ -793,7 +851,7 @@
         groups.forEach(function (g, gi) {
           var col = palette[gi % palette.length];
           var whens = Object.keys(g.whens);
-          var whenTxt = whens.length === 1 ? whens[0] : (whens.length ? whens[whens.length - 1] + ' – ' + whens[0] : '');
+          var whenTxt = whens.length ? certRange(whens, lang) : '';
           var word = plCert(g.items.length, lang);
           s += '<div class="cert-group" style="--cg:' + col + '">'
              + '<div class="cert-group-head">'

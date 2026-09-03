@@ -52,8 +52,8 @@ Stránka je od začiatku dvojjazyčná — každý text je pár `{ sk, en }` a p
 - 🌍 **Dvojjazyčnosť SK/EN** — každé textové pole je `{ sk, en }` pár, ktorý rozbaľuje helper `t()`. Voľba jazyka sa ukladá do `localStorage` aj `sessionStorage` a obnoví sa pri ďalšej návšteve.
 - 🧩 **Plne dátovo riadený render** — hero, odkazy, štatistiky, všetky sekcie aj pätička vznikajú z `window.CV_DATA`. Poradie a viditeľnosť sekcií riadi `sections.order` a `show: true/false`, prázdne sekcie sa preskočia a čísla sekcií (01, 02, ...) sa prečíslujú automaticky.
 - 🎨 **Téma z dát** — `meta.accent`, `accent2` a `accent3` sa pri renderi zapisujú do CSS custom properties na `:root`, takže celá paleta sa mení z `content.js`.
-- 🗂️ **Päť typov sekcií s vlastným layoutom** — časová os skúseností (badge `teraz` pri `current: true`), mriežka projektov (`featured: true` dostane akcentový rám a badge `Hlavný`/`Featured`), riadky schopností, vzdelanie s badge `študujem`/`studying` a certifikáty.
-- 🏅 **Automatické zoskupenie certifikátov** — podľa poľa `issuer`, každá skupina má rotujúcu akcentovú farbu, rozsah dátumov, počet so správnym slovenským skloňovaním (certifikát / certifikáty / certifikátov) a tlačidlo na rozbalenie všetkého nad prvých päť.
+- 🗂️ **Šesť typov sekcií s vlastným layoutom** — časová os skúseností (badge `teraz` pri `current: true`), mriežka projektov (`featured: true` dostane akcentový rám a badge `Hlavný`/`Featured`), riadky schopností, vzdelanie s badge `študujem`/`studying`, certifikáty a kartičky záujmov.
+- 🏅 **Automatické zoskupenie certifikátov** — podľa poľa `issuer`, každá skupina má rotujúcu akcentovú farbu, rozsah dátumov, počet so správnym slovenským skloňovaním (certifikát / certifikáty / certifikátov) a tlačidlo na rozbalenie všetkého nad prvých päť. Rozsah dátumov skupiny sa počíta z jednotlivých `when` hodnôt (napr. `Október – November 2025` + `December 2025 – Január 2026` → `Október 2025 – Január 2026`).
 - 📊 **Animované počítadlá** — počty skúseností, certifikátov a projektov sa odvodzujú z dát (nie sú natvrdo napísané) a odpočítavajú sa nahor s cubic easingom, keď sa dostanú do viewportu.
 - 🔍 **SEO a social metadáta za behu** — `<title>`, `description`, `og:title`, `og:description`, `og:image`, `og:url`, `twitter:image`, `canonical`, `hreflang` (sk / en / x-default) a JSON-LD blok `schema.org/Person` sa vkladajú a aktualizujú pri každej zmene jazyka.
 - 🎯 **Favicon z monogramu** — SVG data URI sa generuje z iniciál mena a nastavenej akcentovej farby, nahrádza fallback v `<head>`.
@@ -114,7 +114,8 @@ Kľúčové funkcie v inline skripte `index.html`:
 | `esc()` / `safeUrl()`                                  | HTML escaping textu a neutralizácia `javascript:` URL              |
 | `getSiteUrl()` / `absUrl()`                            | základná URL stránky a absolútne cesty pre metadáta                |
 | `render()`                                             | poskladá celý dokument a zapíše ho do `<main id="app">`            |
-| `renderSection()`                                      | päť vetiev layoutu podľa kľúča sekcie                              |
+| `renderSection()`                                      | šesť vetiev layoutu podľa kľúča sekcie                             |
+| `certRange()`                                          | rozsah dátumov skupiny certifikátov z jednotlivých `when` hodnôt   |
 | `renderStats()` / `renderJumpNav()`                    | štatistiky a jump navigácia z dát                                  |
 | `updateSeo()` / `updateHreflang()` / `updateFavicon()` | metadáta, JSON-LD a favicon za behu                                |
 | `observeReveals()` / `observeScrollSpy()` / `observeStats()` | tri `IntersectionObserver` inštancie                         |
@@ -142,7 +143,7 @@ Celá konfigurácia je v bloku `meta` v `content.js`. Žiadne premenné prostred
 | `meta.location`                   | Bratislava         | `{ sk, en }` lokalita zobrazená v hero; v JSON-LD slúži len ako prepínač, či sa vygeneruje blok `address` — samotné `addressLocality: 'Bratislava'` a `addressCountry: 'SK'` sú natvrdo v `index.html` |
 | `meta.title` / `meta.description` | `{ sk, en }`       | `<title>` a meta description podľa jazyka                                                                                                                                           |
 | `hero.available`                  | `true`             | zapína pulzujúcu bodku dostupnosti vo farbe `meta.accent`                                                                                                                           |
-| `sections.order`                  | pole 5 kľúčov      | poradie sekcií na stránke                                                                                                                                                           |
+| `sections.order`                  | pole 6 kľúčov      | poradie sekcií na stránke                                                                                                                                                           |
 | `sections.<key>.show`             | `true`             | vypnutie sekcie bez mazania dát                                                                                                                                                     |
 
 > [!NOTE]
@@ -163,6 +164,7 @@ Celá konfigurácia je v bloku `meta` v `content.js`. Žiadne premenné prostred
 | `skills`      | pole    | `name`, `detail`                                                                           |
 | `education`   | pole    | `current`, `when`, `title`, `place`, `desc`                                                |
 | `certificates`| pole    | `issuer`, `when`, `title`, voliteľne `url`                                                 |
+| `interests`   | pole    | `name`, `detail`                                                                           |
 | `footer`      | objekt  | `email`                                                                                    |
 
 ---

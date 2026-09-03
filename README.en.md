@@ -52,8 +52,8 @@ The site is bilingual from the ground up — every piece of text is a `{ sk, en 
 - 🌍 **SK/EN bilingual support** — every text field is a `{ sk, en }` pair unwrapped by the `t()` helper. The language choice is stored in both `localStorage` and `sessionStorage` and restored on the next visit.
 - 🧩 **Fully data-driven rendering** — the hero, links, stats, all sections and the footer are generated from `window.CV_DATA`. Section order and visibility are controlled by `sections.order` and `show: true/false`; empty sections are skipped and section numbers (01, 02, ...) are renumbered automatically.
 - 🎨 **Theme from data** — `meta.accent`, `accent2` and `accent3` are written into CSS custom properties on `:root` during rendering, so the entire palette is controlled from `content.js`.
-- 🗂️ **Five section types, each with its own layout** — an experience timeline (a `teraz`/`now` badge when `current: true`), a project grid (`featured: true` gets an accent frame and a `Hlavný`/`Featured` badge), skill rows, education with a `študujem`/`studying` badge, and certificates.
-- 🏅 **Automatic certificate grouping** — grouped by the `issuer` field; each group gets a rotating accent colour, a date range, a count with correct Slovak declension (certifikát / certifikáty / certifikátov) and a button to expand everything beyond the first five.
+- 🗂️ **Six section types, each with its own layout** — an experience timeline (a `teraz`/`now` badge when `current: true`), a project grid (`featured: true` gets an accent frame and a `Hlavný`/`Featured` badge), skill rows, education with a `študujem`/`studying` badge, certificates and interest cards.
+- 🏅 **Automatic certificate grouping** — grouped by the `issuer` field; each group gets a rotating accent colour, a date range, a count with correct Slovak declension (certifikát / certifikáty / certifikátov) and a button to expand everything beyond the first five. The group date range is computed from the individual `when` values (e.g. `October – November 2025` + `December 2025 – January 2026` → `October 2025 – January 2026`).
 - 📊 **Animated counters** — the counts of experience entries, certificates and projects are derived from the data (not hardcoded) and count up with cubic easing once they enter the viewport.
 - 🔍 **Runtime SEO and social metadata** — `<title>`, `description`, `og:title`, `og:description`, `og:image`, `og:url`, `twitter:image`, `canonical`, `hreflang` (sk / en / x-default) and a `schema.org/Person` JSON-LD block are injected and updated on every language change.
 - 🎯 **Monogram favicon** — an SVG data URI is generated from the initials of the name and the configured accent colour, replacing the fallback in `<head>`.
@@ -114,7 +114,8 @@ Key functions in the inline script of `index.html`:
 | `esc()` / `safeUrl()`                                  | HTML-escapes text and neutralises `javascript:` URLs                |
 | `getSiteUrl()` / `absUrl()`                            | the site base URL and absolute paths for metadata                   |
 | `render()`                                             | assembles the whole document and writes it into `<main id="app">`   |
-| `renderSection()`                                      | five layout branches depending on the section key                   |
+| `renderSection()`                                      | six layout branches depending on the section key                    |
+| `certRange()`                                          | group date range computed from the individual `when` values         |
 | `renderStats()` / `renderJumpNav()`                    | stats and jump navigation from the data                             |
 | `updateSeo()` / `updateHreflang()` / `updateFavicon()` | metadata, JSON-LD and favicon at runtime                            |
 | `observeReveals()` / `observeScrollSpy()` / `observeStats()` | three `IntersectionObserver` instances                        |
@@ -142,7 +143,7 @@ The entire configuration lives in the `meta` block in `content.js`. No environme
 | `meta.location`                   | Bratislava         | the `{ sk, en }` location shown in the hero; in JSON-LD it only acts as a switch for whether the `address` block is generated — `addressLocality: 'Bratislava'` and `addressCountry: 'SK'` themselves are hardcoded in `index.html` |
 | `meta.title` / `meta.description` | `{ sk, en }`       | the `<title>` and meta description per language                                                                                                                                     |
 | `hero.available`                  | `true`             | enables the pulsing availability dot in the `meta.accent` colour                                                                                                                    |
-| `sections.order`                  | array of 5 keys    | the order of the sections on the page                                                                                                                                               |
+| `sections.order`                  | array of 6 keys    | the order of the sections on the page                                                                                                                                               |
 | `sections.<key>.show`             | `true`             | turns a section off without deleting its data                                                                                                                                       |
 
 > [!NOTE]
@@ -163,6 +164,7 @@ The entire configuration lives in the `meta` block in `content.js`. No environme
 | `skills`      | array   | `name`, `detail`                                                                           |
 | `education`   | array   | `current`, `when`, `title`, `place`, `desc`                                                |
 | `certificates`| array   | `issuer`, `when`, `title`, optionally `url`                                                |
+| `interests`   | array   | `name`, `detail`                                                                           |
 | `footer`      | object  | `email`                                                                                    |
 
 ---
