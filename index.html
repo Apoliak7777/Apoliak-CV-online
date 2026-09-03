@@ -453,16 +453,72 @@
     }
 
     /* tlač / uloženie do PDF cez prehliadač */
+    /* ---- tlač do PDF ----------------------------------------------------
+       Nie holý text: paleta sa len preloží do tlačovej verzie (akcenty stmavené,
+       aby boli na bielom čitateľné) a zvyšok dizajnu — monogram, čísla sekcií,
+       badge, karty, časová os — ostáva tak, ako ho vidno na webe. */
+    @page { margin: 14mm 13mm; }
     @media print {
-      body { background: #fff; color: #111; padding: 0; }
-      body::before, .lang, .progress, .to-top, .fab-top, .jump-nav, .toast, .cert-more { display: none !important; }
+      /* !important je tu nutné: render() zapisuje --accent/-2/-3 z content.js
+         priamo do inline style na <html>, čo by tlačovú paletu inak prebilo
+         a akcenty by ostali svetlé (na bielom nečitateľné). */
+      :root {
+        --bg: #ffffff !important; --surface: #ffffff !important; --surface-2: #ffffff !important; --surface-3: #f4f4f2 !important;
+        --line: #d9dbd6 !important; --line-2: #c2c5be !important;
+        --text: #14161a !important; --text-mid: #4a4e57 !important; --text-dim: #71757e !important;
+        --accent: #4f6b00 !important; --accent-2: #a8500a !important; --accent-3: #14618f !important;
+        --glow: transparent !important;
+        --shadow: none !important;
+      }
+      html, body {
+        background: #fff !important; background-image: none !important;
+        color: var(--text); padding: 0; font-size: 10.5pt;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      body::before, .lang, .progress, .to-top, .fab-top, .jump-nav, .toast,
+      .cert-more, .share-link, .print-cv, .skip { display: none !important; }
       .cert-chip.is-hidden { display: flex !important; }
       .wrap { max-width: 100%; }
-      a { color: #111; }
-      .hero h1 { -webkit-text-fill-color: #111; color: #111; }
-      .reveal, .rise { opacity: 1 !important; transform: none !important; }
-      .project, .status, .stat, .cert-chip, .interest { border-color: #ccc; box-shadow: none; background: #fff; }
-      .stats { grid-template-columns: repeat(3,1fr); }
+      .reveal, .rise { opacity: 1 !important; transform: none !important; animation: none !important; }
+      .stat-val { opacity: 1 !important; }
+
+      /* hlavička na jednu stranu, meno nezalomené na dva riadky zbytočne */
+      .hero { padding: 0 0 10px !important; }
+      .hero h1 { -webkit-text-fill-color: var(--text); color: var(--text); font-size: 30pt; line-height: 1.05; }
+      .hero h1 .accent { -webkit-text-fill-color: var(--accent); color: var(--accent); }
+      .bio { font-size: 10.5pt; margin-top: 12px; max-width: 100%; }
+      .monogram { width: 54px; height: 54px; font-size: 20px; box-shadow: none; }
+      .dot { animation: none !important; box-shadow: none !important; }
+      .links { margin-top: 16px; gap: 8px; }
+      .links a { border-color: var(--line); color: var(--text); padding: 5px 10px; }
+
+      /* kompaktnejšie rozostupy — na papieri nie je dôvod na vzduch ako na webe */
+      section { padding-top: 26px; }
+      .sec-head { margin-bottom: 12px; }
+      .exp { padding: 4px 0 14px; gap: 16px; }
+      .cert-group { padding: 12px 0; }
+      .skill { padding: 8px 0; }
+      .stats { margin-top: 18px; padding: 12px 0; }
+      .stat-num { font-size: 22pt; }
+
+      /* karty a bloky bez tieňov, s tlačovým rámikom */
+      .project, .status, .stat, .cert-chip, .interest, .cert-group {
+        box-shadow: none !important; background: #fff !important;
+      }
+      .project::before, .project::after { display: none !important; }
+
+      /* nič sa nesmie roztrhnúť cez zlom strany */
+      section, .exp, .project, .edu, .skill, .interest, .cert-group, .stats {
+        break-inside: avoid; page-break-inside: avoid;
+      }
+      .sec-head { break-after: avoid; page-break-after: avoid; }
+
+      /* odkazy: adresu vypíšeme za text, inak je v papierovej verzii stratená */
+      a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-family: 'JetBrains Mono', monospace; font-size: 8pt; color: var(--text-dim); word-break: break-all;
+      }
+      .links a[href^="http"]::after, .jump-nav a::after, .cert-chip::after { content: none; }
     }
   </style>
 </head>
@@ -608,7 +664,9 @@
         email: (D.footer || {}).email || undefined,
         url: site || undefined,
         image: og || undefined,
-        address: t(m.location, lang) ? { '@type': 'PostalAddress', addressLocality: 'Bratislava', addressCountry: 'SK' } : undefined,
+        birthDate: m.birthISO || undefined,
+        telephone: (D.links || []).reduce(function (acc, lk) { return acc || (/^tel:/i.test(String(lk.url || '')) ? String(lk.url).replace(/^tel:/i, '') : ''); }, '') || undefined,
+        address: t(m.location, lang) ? { '@type': 'PostalAddress', addressLocality: m.locality || t(m.location, lang), addressCountry: 'SK' } : undefined,
         sameAs: links.length ? links : undefined
       });
       document.head.appendChild(script);
@@ -666,6 +724,8 @@
       html += '<div class="status rise d1"><span class="dot ' + (h.available ? 'on' : '') + '"></span>'
             + '<span class="mono">&gt; ' + esc(t(h.status, lang)) + '</span></div>';
       if (t(m.location, lang)) html += '<span class="status rise d1" style="color:var(--text-dim)"><span class="mono">' + esc(t(m.location, lang)) + '</span></span>';
+      if (t(m.birth, lang)) html += '<span class="status rise d1" style="color:var(--text-dim)"><span class="mono">'
+            + (lang === 'sk' ? 'nar. ' : 'b. ') + esc(t(m.birth, lang)) + '</span></span>';
       html += '</div>';
 
       html += '<h1 class="rise d2">' + nameHtml + '<span class="accent">.</span></h1>';
@@ -685,6 +745,10 @@
       if (m.cvFile && !/tvoje-domena/.test(m.cvFile)) {
         html += '<a class="cv" href="' + esc(safeUrl(m.cvFile)) + '" target="_blank" rel="noopener">'
               + (lang === 'sk' ? 'Stiahnuť CV (PDF)' : 'Download CV (PDF)') + ' &#8595;</a>';
+      } else {
+        // bez nahratého PDF vytlačíme túto stránku — print štýl z nej spraví hotový dokument
+        html += '<button type="button" class="cv print-cv">'
+              + (lang === 'sk' ? 'Stiahnuť CV (PDF)' : 'Download CV (PDF)') + ' &#8595;</button>';
       }
       html += '<button type="button" class="share-link">' + (lang === 'sk' ? 'zdieľať' : 'share') + ' &#128279;</button>';
       html += '</nav>';
@@ -990,6 +1054,14 @@
       });
       var fab = document.getElementById('fab-top');
       if (fab) fab.onclick = function () { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+      // "Stiahnuť CV (PDF)" bez nahratého súboru = tlač stránky do PDF
+      document.querySelectorAll('.print-cv').forEach(function (btn) {
+        btn.onclick = function () {
+          showToast(lang === 'sk' ? 'Vyber „Uložiť ako PDF"' : 'Choose "Save as PDF"');
+          setTimeout(function () { window.print(); }, 250);
+        };
+      });
 
       document.querySelectorAll('.share-link').forEach(function (btn) {
         btn.onclick = function () {

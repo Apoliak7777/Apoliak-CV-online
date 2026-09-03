@@ -12,10 +12,13 @@ window.CV_DATA = {
     accent2: "#ff9d54",   // doplnková farba (oranžová)
     accent3: "#7cc5ff",   // treťia farba (jemná modrá — použitá pri certifikátoch)
     photo: "",            // vlož URL fotky; ak je prázdne, zobrazí sa monogram "AP"
-    cvFile: "",           // vlož odkaz na svoje PDF CV (napr. https://.../Alex_Poliak_CV.pdf) a pribudne tlačidlo na stiahnutie
+    cvFile: "",           // odkaz na hotové PDF; ak je prázdne, tlačidlo "Stiahnuť CV (PDF)" vytlačí túto stránku
     siteUrl: "https://apoliak7777.github.io/Apoliak-CV-online/",  // plná URL stránky — pre OG náhľad a SEO
     ogImage: "og-image.svg",
-    location: { sk: "Bratislava, Slovensko", en: "Bratislava, Slovakia" },
+    location: { sk: "Nová Dedinka, Slovensko", en: "Nová Dedinka, Slovakia" },
+    locality: "Nová Dedinka",     // obec pre JSON-LD (schema.org PostalAddress)
+    birth: { sk: "25. 8. 2008", en: "25 Aug 2008" },
+    birthISO: "2008-08-25",       // strojovo čitateľný dátum pre JSON-LD
     title: { sk: "Alex Poliak — Portfólio", en: "Alex Poliak — Portfolio" },
     description: { sk: "Študent elektrotechniky so záujmom o programovanie, web development a umelú inteligenciu. Hľadám brigádu alebo junior pozíciu.", en: "Electrical engineering student interested in programming, web development and AI. Looking for an internship or junior position." }
   },
@@ -29,6 +32,7 @@ window.CV_DATA = {
 
   links: [
     { label: { sk: "e-mail", en: "email" }, url: "mailto:alexpoliak21@gmail.com" },
+    { label: { sk: "telefón", en: "phone" }, url: "tel:+421918223478" },
     { label: { sk: "LinkedIn", en: "LinkedIn" }, url: "https://www.linkedin.com/in/alex-poliak/" },
     { label: { sk: "GitHub", en: "GitHub" }, url: "https://github.com/Apoliak7777" }
   ],

@@ -60,7 +60,7 @@ Stránka je od začiatku dvojjazyčná — každý text je pár `{ sk, en }` a p
 - 🖼️ **Fallback avatara** — pri vyplnenom `meta.photo` sa vykreslí `<img>`, inak gradientový monogram z iniciál.
 - 📋 **Kopírovanie do schránky** — tlačidlo `zdieľať` skopíruje URL stránky, e-mail v pätičke skopíruje adresu; obe s toast potvrdením a fallbackom (toast s URL, resp. `mailto:`).
 - 🧭 **Scroll UX** — horný progress bar, jump-nav so scroll-spy cez `IntersectionObserver` a plávajúce tlačidlo späť hore.
-- 🖨️ **Tlač do PDF** — samostatný `@media print` stylesheet prepne na svetlú tému, skryje prepínač jazyka, progress bar, navigáciu, plávajúce tlačidlo aj toast a **rozbalí všetky skryté certifikáty**.
+- 🖨️ **Tlač do PDF priamo zo stránky** — tlačidlo *Stiahnuť CV (PDF)* spustí `window.print()` a `@media print` stylesheet z webu spraví hotový dokument: stmavené akcenty čitateľné na bielom, zachovaný monogram, čísla sekcií, badge aj karty, stiahnuté rozostupy, `break-inside: avoid` proti trhaniu cez zlom strany, adresy externých odkazov vypísané v texte a **rozbalené všetky skryté certifikáty**.
 - ♿ **Prístupnosť** — skip-to-content odkaz, `role="status" aria-live="polite"` toast, `aria-label` na prepínači jazyka aj navigácii, viditeľné `:focus-visible` outliny a plný blok `prefers-reduced-motion`.
 - 🛟 **Odolnosť voči chybám** — viditeľný boot stav `Načítavam CV… / Loading…`, `<noscript>` hláška, try/catch okolo štartu, ktorý chybu vypíše priamo na stránku namiesto čiernej obrazovky, fallback keď `IntersectionObserver` chýba, a poistka po 1,4 s, ktorá pridá `body.force` a natvrdo zobrazí čokoľvek zaseknuté na `opacity: 0`.
 
@@ -137,17 +137,19 @@ Celá konfigurácia je v bloku `meta` v `content.js`. Žiadne premenné prostred
 | `meta.accent2`                    | `#ff9d54`          | doplnková farba → `--accent-2`                                                                                                                                                      |
 | `meta.accent3`                    | `#7cc5ff`          | tretia farba → `--accent-3` (skupiny certifikátov)                                                                                                                                  |
 | `meta.photo`                      | prázdne            | URL fotky; prázdne = gradientový monogram                                                                                                                                           |
-| `meta.cvFile`                     | prázdne            | URL na PDF; po vyplnení pribudne tlačidlo *Stiahnuť CV (PDF)*                                                                                                                       |
-| `meta.siteUrl`                    | prázdne            | **doplniť po nasadení** — plná verejná URL pre SEO a OG                                                                                                                             |
+| `meta.cvFile`                     | prázdne            | URL na hotové PDF. Ak je prázdne, tlačidlo *Stiahnuť CV (PDF)* nezmizne — vytlačí samotnú stránku cez `window.print()` a tlačový štýl z nej spraví hotový dokument                   |
+| `meta.siteUrl`                    | verejná URL        | plná verejná URL pre SEO a OG; bez nej vyjdú canonical a `og:url` neúplné                                                                                                           |
 | `meta.ogImage`                    | `og-image.svg`     | náhľadový obrázok, absolutizuje sa voči `siteUrl`                                                                                                                                   |
-| `meta.location`                   | Bratislava         | `{ sk, en }` lokalita zobrazená v hero; v JSON-LD slúži len ako prepínač, či sa vygeneruje blok `address` — samotné `addressLocality: 'Bratislava'` a `addressCountry: 'SK'` sú natvrdo v `index.html` |
+| `meta.location`                   | `{ sk, en }`       | lokalita zobrazená v hero; zároveň prepína, či sa v JSON-LD vygeneruje blok `address`                                                                                                |
+| `meta.locality`                   | obec               | `addressLocality` pre JSON-LD; ak chýba, použije sa `meta.location` v aktuálnom jazyku                                                                                               |
+| `meta.birth` / `meta.birthISO`    | `{ sk, en }` / ISO | dátum narodenia v hero (`nar.` / `b.`) a `birthDate` v JSON-LD; obe prázdne = nezobrazí sa nič                                                                                       |
 | `meta.title` / `meta.description` | `{ sk, en }`       | `<title>` a meta description podľa jazyka                                                                                                                                           |
 | `hero.available`                  | `true`             | zapína pulzujúcu bodku dostupnosti vo farbe `meta.accent`                                                                                                                           |
 | `sections.order`                  | pole 6 kľúčov      | poradie sekcií na stránke                                                                                                                                                           |
 | `sections.<key>.show`             | `true`             | vypnutie sekcie bez mazania dát                                                                                                                                                     |
 
 > [!NOTE]
-> Hlavná ladiaca konštanta mimo `content.js` je `CERT_PREVIEW = 5` v inline skripte `index.html` — koľko certifikátov na vydavateľa sa zobrazí pred tlačidlom *Zobraziť ďalších N*. Okrem nej sú v `index.html` natvrdo aj fallback favicon (monogram „AP" a farba `#d6ff4b`), statický `<title>Portfólio</title>`, `theme-color` (statická hodnota v `<head>`, ktorú `render()` prepíše vypočítaným pozadím `body`), `og:locale` (`sk_SK`), rozmery OG obrázka, JSON-LD adresa a celá `:root` fallback paleta, ktorej `--accent` / `--accent-2` / `--accent-3` duplikujú hodnoty z `content.js`.
+> Hlavná ladiaca konštanta mimo `content.js` je `CERT_PREVIEW = 5` v inline skripte `index.html` — koľko certifikátov na vydavateľa sa zobrazí pred tlačidlom *Zobraziť ďalších N*. Okrem nej sú v `index.html` natvrdo aj fallback favicon (monogram „AP" a farba `#d6ff4b`), statický `<title>Portfólio</title>`, `theme-color` (statická hodnota v `<head>`, ktorú `render()` prepíše vypočítaným pozadím `body`), `og:locale` (`sk_SK`), rozmery OG obrázka, krajina `SK` v JSON-LD adrese a celá `:root` fallback paleta, ktorej `--accent` / `--accent-2` / `--accent-3` duplikujú hodnoty z `content.js`.
 
 ---
 
@@ -187,7 +189,18 @@ Skratky sú potlačené, kým je fokus v `INPUT`, `TEXTAREA` alebo `SELECT`.
 
 ## 🖨️ Tlač a PDF
 
-Export do PDF nie je funkcia aplikácie, ale natívna funkcia prehliadača: `Ctrl` + `P` (resp. `Cmd` + `P`) → *Uložiť ako PDF*. Aplikácia k nej dodáva len `@media print` stylesheet, ktorý pre tlač prepne na svetlú tému, skryje ovládacie prvky a rozbalí všetky skryté certifikáty.
+Export do PDF robí prehliadač: `Ctrl` + `P` (resp. `Cmd` + `P`) → *Uložiť ako PDF*. To isté spustí tlačidlo **Stiahnuť CV (PDF)** v hlavičke, keď `meta.cvFile` nie je vyplnené.
+
+O výsledný vzhľad sa stará `@media print` stylesheet. Nerobí z dokumentu holý text — len preloží paletu do tlačovej verzie a zvyšok dizajnu necháva tak, ako ho vidno na webe:
+
+- akcenty sa stmavia (`#4f6b00`, `#a8500a`, `#14618f`), aby boli na bielom čitateľné, ale monogram, čísla sekcií, badge, karty aj časová os ostávajú;
+- rozostupy sa stiahnu, `@page` má okraje 14 × 13 mm a `print-color-adjust: exact` zaručí, že prehliadač farby nezahodí;
+- `break-inside: avoid` drží pohromade jednotlivé záznamy, aby sa nerozpadli cez zlom strany;
+- skryjú sa ovládacie prvky (prepínač jazyka, jump-nav, progress bar, tlačidlá) a **rozbalia sa všetky skryté certifikáty**;
+- za externými odkazmi sa v texte vypíše ich adresa — na papieri je inak stratená.
+
+> [!IMPORTANT]
+> Tlačová paleta v `:root` musí mať `!important`. `render()` zapisuje `--accent`, `--accent-2` a `--accent-3` z `content.js` priamo do inline `style` na `<html>`, čo má vyššiu prioritu než blok v `@media print` — bez `!important` by v PDF ostali svetlé akcenty a na bielom by boli nečitateľné.
 
 ---
 

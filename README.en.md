@@ -60,7 +60,7 @@ The site is bilingual from the ground up — every piece of text is a `{ sk, en 
 - 🖼️ **Avatar fallback** — when `meta.photo` is filled in, an `<img>` is rendered; otherwise a gradient monogram from the initials.
 - 📋 **Copy to clipboard** — the `share` button copies the page URL, and the e-mail in the footer copies the address; both with a toast confirmation and a fallback (a toast containing the URL, or `mailto:` respectively).
 - 🧭 **Scroll UX** — a top progress bar, a jump nav with scroll-spy via `IntersectionObserver`, and a floating back-to-top button.
-- 🖨️ **Print to PDF** — a dedicated `@media print` stylesheet switches to a light theme, hides the language switcher, progress bar, navigation, floating button and toast, and **expands all hidden certificates**.
+- 🖨️ **Print to PDF straight from the page** — the *Download CV (PDF)* button calls `window.print()` and the `@media print` stylesheet turns the site into a finished document: darkened accents readable on white, the monogram, section numbers, badges and cards preserved, tightened spacing, `break-inside: avoid` against page-break tearing, external link addresses printed inline, and **all hidden certificates expanded**.
 - ♿ **Accessibility** — a skip-to-content link, a `role="status" aria-live="polite"` toast, `aria-label` on the language switcher and the navigation, visible `:focus-visible` outlines and a full `prefers-reduced-motion` block.
 - 🛟 **Failure resilience** — a visible `Načítavam CV… / Loading…` boot state, a `<noscript>` message, a try/catch around startup that prints the error straight onto the page instead of showing a black screen, a fallback for when `IntersectionObserver` is missing, and a 1.4 s safety net that adds `body.force` and forcibly reveals anything stuck at `opacity: 0`.
 
@@ -137,17 +137,19 @@ The entire configuration lives in the `meta` block in `content.js`. No environme
 | `meta.accent2`                    | `#ff9d54`          | complementary colour → `--accent-2`                                                                                                                                                 |
 | `meta.accent3`                    | `#7cc5ff`          | third colour → `--accent-3` (certificate groups)                                                                                                                                    |
 | `meta.photo`                      | empty              | photo URL; empty = gradient monogram                                                                                                                                                |
-| `meta.cvFile`                     | empty              | URL to a PDF; once filled in, a *Download CV (PDF)* button appears                                                                                                                  |
-| `meta.siteUrl`                    | empty              | **fill in after deployment** — the full public URL for SEO and OG                                                                                                                   |
+| `meta.cvFile`                     | empty              | URL to a ready-made PDF. When empty the *Download CV (PDF)* button stays — it prints the page itself via `window.print()` and the print stylesheet turns it into a finished document |
+| `meta.siteUrl`                    | public URL         | the full public URL for SEO and OG; without it canonical and `og:url` come out incomplete                                                                                           |
 | `meta.ogImage`                    | `og-image.svg`     | the preview image, made absolute against `siteUrl`                                                                                                                                  |
-| `meta.location`                   | Bratislava         | the `{ sk, en }` location shown in the hero; in JSON-LD it only acts as a switch for whether the `address` block is generated — `addressLocality: 'Bratislava'` and `addressCountry: 'SK'` themselves are hardcoded in `index.html` |
+| `meta.location`                   | `{ sk, en }`       | the location shown in the hero; it also switches whether the JSON-LD `address` block is generated                                                                                   |
+| `meta.locality`                   | town               | `addressLocality` for JSON-LD; falls back to `meta.location` in the current language                                                                                                |
+| `meta.birth` / `meta.birthISO`    | `{ sk, en }` / ISO | date of birth in the hero (`nar.` / `b.`) and `birthDate` in JSON-LD; leave both empty to show nothing                                                                               |
 | `meta.title` / `meta.description` | `{ sk, en }`       | the `<title>` and meta description per language                                                                                                                                     |
 | `hero.available`                  | `true`             | enables the pulsing availability dot in the `meta.accent` colour                                                                                                                    |
 | `sections.order`                  | array of 6 keys    | the order of the sections on the page                                                                                                                                               |
 | `sections.<key>.show`             | `true`             | turns a section off without deleting its data                                                                                                                                       |
 
 > [!NOTE]
-> The main tuning constant outside `content.js` is `CERT_PREVIEW = 5` in the inline script of `index.html` — how many certificates per issuer are shown before the *Show N more* button. Besides it, `index.html` also hardcodes the fallback favicon (the "AP" monogram and the colour `#d6ff4b`), the static `<title>Portfólio</title>`, `theme-color` (a static value in `<head>` that `render()` overwrites with the computed `body` background), `og:locale` (`sk_SK`), the OG image dimensions, the JSON-LD address and the entire `:root` fallback palette, whose `--accent` / `--accent-2` / `--accent-3` duplicate the values from `content.js`.
+> The main tuning constant outside `content.js` is `CERT_PREVIEW = 5` in the inline script of `index.html` — how many certificates per issuer are shown before the *Show N more* button. Besides it, `index.html` also hardcodes the fallback favicon (the "AP" monogram and the colour `#d6ff4b`), the static `<title>Portfólio</title>`, `theme-color` (a static value in `<head>` that `render()` overwrites with the computed `body` background), `og:locale` (`sk_SK`), the OG image dimensions, the `SK` country in the JSON-LD address and the entire `:root` fallback palette, whose `--accent` / `--accent-2` / `--accent-3` duplicate the values from `content.js`.
 
 ---
 
@@ -187,7 +189,18 @@ The shortcuts are suppressed while focus is inside an `INPUT`, `TEXTAREA` or `SE
 
 ## 🖨️ Printing and PDF
 
-Exporting to PDF is not an application feature but a native browser one: `Ctrl` + `P` (or `Cmd` + `P`) → *Save as PDF*. All the application adds is the `@media print` stylesheet, which switches to a light theme for printing, hides the controls and expands all hidden certificates.
+The browser does the PDF export: `Ctrl` + `P` (or `Cmd` + `P`) → *Save as PDF*. The **Download CV (PDF)** button in the header triggers the same thing whenever `meta.cvFile` is empty.
+
+The `@media print` stylesheet takes care of how the result looks. It does not reduce the document to plain text — it only translates the palette into a print version and leaves the rest of the design as it appears on the web:
+
+- accents are darkened (`#4f6b00`, `#a8500a`, `#14618f`) so they stay readable on white, while the monogram, section numbers, badges, cards and the timeline all remain;
+- spacing tightens up, `@page` uses 14 × 13 mm margins, and `print-color-adjust: exact` keeps the browser from dropping the colours;
+- `break-inside: avoid` holds individual entries together so they do not fall apart across a page break;
+- the controls (language switcher, jump nav, progress bar, buttons) are hidden and **all hidden certificates are expanded**;
+- external links get their address printed after the text — on paper it would otherwise be lost.
+
+> [!IMPORTANT]
+> The print palette in `:root` must use `!important`. `render()` writes `--accent`, `--accent-2` and `--accent-3` from `content.js` straight into the inline `style` on `<html>`, which outranks the `@media print` block — without `!important` the PDF would keep the light accents and they would be unreadable on white.
 
 ---
 
