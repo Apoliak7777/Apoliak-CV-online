@@ -222,27 +222,27 @@ body.force .sec-head::after, body.force .timeline::before { transform: none !imp
 .hero .bio { font-size: clamp(16px, 2.6vw, 19px); color: var(--text-mid); max-width: 60ch; margin-top: 20px; }
 
 .links { display: flex; gap: 11px; margin-top: 32px; flex-wrap: wrap; align-items: center; }
-.links a {
-  font-family: 'JetBrains Mono', monospace; font-size: 14px;
+/* jedno pravidlo pre odkazy aj tlačidlá — tlačidlo bez neho vykreslí
+   prehliadač natívne (biele) a v rade odkazov to vyčnieva */
+.links a, .links button {
+  appearance: none; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: inherit;
   padding: 10px 17px; background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius-sm); color: var(--text); text-decoration: none;
   transition: border-color .18s var(--ease), color .18s var(--ease), transform .18s var(--ease), background .18s var(--ease);
 }
-.links a:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
-.links a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.links .share-link {
-  appearance: none; font-family: 'JetBrains Mono', monospace; font-size: 14px;
-  padding: 10px 17px; background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
-  transition: border-color .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+.links a:hover, .links button:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+.links a:focus-visible, .links button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* stiahnutie CV — hlavná akcia, odlíšená akcentom, nie výplňou */
+.links .cv {
+  color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }
-.links .share-link:hover { border-color: var(--accent-3); color: var(--accent-3); transform: translateY(-2px); }
-.links .share-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.links a.cv {
-  background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 500;
-  box-shadow: 0 12px 30px -16px var(--glow);
+.links .cv:hover {
+  color: var(--accent); border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  transform: translateY(-2px);
 }
-.links a.cv:hover { color: var(--bg); filter: brightness(1.06); transform: translateY(-2px); }
 
 /* highlights — štatistiky z dát */
 .stats {
@@ -584,7 +584,7 @@ footer a:hover { color: var(--accent); }
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   body::before, .lang, .to-top, .fab-top, .jump-nav, .toast,
-  .cert-more, .share-link, .print-cv, .skip { display: none !important; }
+  .cert-more, .print-cv, .skip { display: none !important; }
   .cert-chip.is-hidden { display: flex !important; }
   .wrap { max-width: 100%; }
   .reveal, .rise, .r-item, .sec-num { opacity: 1 !important; transform: none !important; animation: none !important; }

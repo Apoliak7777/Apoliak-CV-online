@@ -58,7 +58,7 @@ Stránka je od začiatku dvojjazyčná — každý text je pár `{ sk, en }` a p
 - 🔍 **SEO a social metadáta za behu** — `<title>`, `description`, `og:title`, `og:description`, `og:image`, `og:url`, `twitter:image`, `canonical`, `hreflang` (sk / en / x-default) a JSON-LD blok `schema.org/Person` sa vkladajú a aktualizujú pri každej zmene jazyka.
 - 🎯 **Favicon z monogramu** — SVG data URI sa generuje z iniciál mena a nastavenej akcentovej farby, nahrádza fallback v `<head>`.
 - 🖼️ **Fallback avatara** — pri vyplnenom `meta.photo` sa vykreslí `<img>`, inak gradientový monogram z iniciál.
-- 📋 **Kopírovanie do schránky** — tlačidlo `zdieľať` skopíruje URL stránky, e-mail v pätičke skopíruje adresu; obe s toast potvrdením a fallbackom (toast s URL, resp. `mailto:`).
+- 📋 **Kopírovanie do schránky** — e-mail v pätičke skopíruje adresu, s toast potvrdením a fallbackom na `mailto:`.
 - 🧭 **Scroll UX** — jump-nav so scroll-spy cez `IntersectionObserver` a plávajúce tlačidlo späť hore.
 - ✨ **Odhaľovanie pri scrollovaní** — sekcia sa neobjaví naraz: roztiahne sa jej horná linka, zľava pricestuje číslo sekcie, dokreslí sa zvislá čiara časovej osi a položky prilietajú jedna po druhej (poradie drží CSS premenná `--i`, ktorú priradí `observeReveals()`).
 - 🗃️ **Podstránka so všetkými projektami** — `projekty.html` vypisuje všetky verejné GitHub projekty, roztriedené do kategórií, s filtrom, ktorý si voľbu pamätá v `sessionStorage`, a vlastným JSON-LD blokom `CollectionPage`.
@@ -90,7 +90,7 @@ npx serve .
 ```
 
 > [!TIP]
-> Server nie je zbytočnosť. Funkcia `getSiteUrl()` padá späť na `location.origin` len pri protokole `http:` / `https:`. Cez `file://` vráti prázdny reťazec, takže canonical URL, `og:url`, `og:image` aj JSON-LD polia `url`/`image` vyjdú prázdne a hreflang tagy sa nevygenerujú vôbec. Clipboard API navyše potrebuje secure context, takže tlačidlá `zdieľať` a kopírovanie e-mailu cez `file://` len zobrazia toast, resp. otvoria `mailto:`.
+> Server nie je zbytočnosť. Funkcia `getSiteUrl()` padá späť na `location.origin` len pri protokole `http:` / `https:`. Cez `file://` vráti prázdny reťazec, takže canonical URL, `og:url`, `og:image` aj JSON-LD polia `url`/`image` vyjdú prázdne a hreflang tagy sa nevygenerujú vôbec. Clipboard API navyše potrebuje secure context, takže kopírovanie e-mailu cez `file://` len otvorí `mailto:`.
 
 **Úprava obsahu** — meníš výhradne `content.js`, potom refresh stránky. Žiadny admin panel ani CMS.
 

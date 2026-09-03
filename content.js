@@ -33,7 +33,6 @@ window.CV_DATA = {
   links: [
     { label: { sk: "e-mail", en: "email" }, url: "mailto:alexpoliak21@gmail.com" },
     { label: { sk: "telefón", en: "phone" }, url: "tel:+421918223478" },
-    { label: { sk: "LinkedIn", en: "LinkedIn" }, url: "https://www.linkedin.com/in/alex-poliak/" },
     { label: { sk: "GitHub", en: "GitHub" }, url: "https://github.com/Apoliak7777" }
   ],
 

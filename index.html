@@ -258,7 +258,6 @@
         html += '<button type="button" class="cv print-cv">'
               + (lang === 'sk' ? 'Stiahnuť CV (PDF)' : 'Download CV (PDF)') + ' &#8595;</button>';
       }
-      html += '<button type="button" class="share-link">' + (lang === 'sk' ? 'zdieľať' : 'share') + ' &#128279;</button>';
       html += '</nav>';
 
       // highlights / štatistiky z dát
@@ -583,18 +582,6 @@
         btn.onclick = function () {
           showToast(lang === 'sk' ? 'Vyber „Uložiť ako PDF"' : 'Choose "Save as PDF"');
           setTimeout(function () { window.print(); }, 250);
-        };
-      });
-
-      document.querySelectorAll('.share-link').forEach(function (btn) {
-        btn.onclick = function () {
-          var url = getSiteUrl() ? getSiteUrl() + location.pathname + location.search : location.href;
-          var done = function () { showToast(lang === 'sk' ? 'Odkaz skopírovaný' : 'Link copied'); };
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(url).then(done).catch(function () { showToast(url); });
-          } else {
-            showToast(url);
-          }
         };
       });
 

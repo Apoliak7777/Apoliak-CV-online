@@ -58,7 +58,7 @@ The site is bilingual from the ground up — every piece of text is a `{ sk, en 
 - 🔍 **Runtime SEO and social metadata** — `<title>`, `description`, `og:title`, `og:description`, `og:image`, `og:url`, `twitter:image`, `canonical`, `hreflang` (sk / en / x-default) and a `schema.org/Person` JSON-LD block are injected and updated on every language change.
 - 🎯 **Monogram favicon** — an SVG data URI is generated from the initials of the name and the configured accent colour, replacing the fallback in `<head>`.
 - 🖼️ **Avatar fallback** — when `meta.photo` is filled in, an `<img>` is rendered; otherwise a gradient monogram from the initials.
-- 📋 **Copy to clipboard** — the `share` button copies the page URL, and the e-mail in the footer copies the address; both with a toast confirmation and a fallback (a toast containing the URL, or `mailto:` respectively).
+- 📋 **Copy to clipboard** — the e-mail in the footer copies the address, with a toast confirmation and a `mailto:` fallback.
 - 🧭 **Scroll UX** — a jump nav with scroll-spy via `IntersectionObserver` and a floating back-to-top button.
 - ✨ **Scroll reveals** — a section does not appear all at once: its top rule stretches out, the section number arrives from the left, the vertical timeline rule is drawn in, and the items fly in one after another (the order is held by the CSS variable `--i`, assigned by `observeReveals()`).
 - 🗃️ **A dedicated projects page** — `projekty.html` lists every public GitHub project, sorted into categories, with a filter that remembers its choice in `sessionStorage` and its own `CollectionPage` JSON-LD block.
@@ -90,7 +90,7 @@ npx serve .
 ```
 
 > [!TIP]
-> The server is not pointless. The `getSiteUrl()` function only falls back to `location.origin` under the `http:` / `https:` protocol. Over `file://` it returns an empty string, so the canonical URL, `og:url`, `og:image` and the JSON-LD `url`/`image` fields come out empty, and the hreflang tags are not generated at all. The Clipboard API additionally requires a secure context, so over `file://` the `share` button and the e-mail copy only show a toast or open `mailto:`.
+> The server is not pointless. The `getSiteUrl()` function only falls back to `location.origin` under the `http:` / `https:` protocol. Over `file://` it returns an empty string, so the canonical URL, `og:url`, `og:image` and the JSON-LD `url`/`image` fields come out empty, and the hreflang tags are not generated at all. The Clipboard API additionally requires a secure context, so over `file://` the e-mail copy only opens `mailto:`.
 
 **Editing content** — you change `content.js` and nothing else, then refresh the page. No admin panel and no CMS.
 
