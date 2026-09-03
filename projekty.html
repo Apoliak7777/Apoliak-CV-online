@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projekty — Alex Poliak</title>
+  <meta name="description" content="">
+  <meta name="theme-color" content="#0a0b0d">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="" id="og-image">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="" id="og-url">
+  <meta property="og:locale" content="sk_SK">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="" id="tw-image">
+  <link rel="canonical" href="" id="canonical">
+
+  <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0b0d'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='34' font-weight='700' fill='%23d6ff4b' text-anchor='middle'%3EAP%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#app">Preskočiť na obsah / Skip to content</a>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <button type="button" class="fab-top" id="fab-top" aria-label="Späť hore / Back to top" title="Späť hore / Back to top">&#8593;</button>
+
+  <div class="lang" role="group" aria-label="Jazyk / Language">
+    <button id="btn-sk" class="active" onclick="setLang('sk')">SK</button>
+    <button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+
+  <main class="wrap" id="app">
+    <noscript><div style="padding:80px 0;color:#f4f5f7;font:16px/1.6 sans-serif">Táto stránka potrebuje zapnutý JavaScript. / This page requires JavaScript.</div></noscript>
+    <div id="boot" style="padding:80px 0;color:#a7abb5;font:16px/1.6 sans-serif">Načítavam projekty… / Loading…</div>
+  </main>
+
+  <!-- DÁTA -->
+  <script src="projects.js"></script>
+  <script>
+    var P = window.PROJECTS_DATA;
+    var lang = 'sk';
+    var filter = 'all';
+    var toastTimer, io;
+
+    function t(v, l) {
+      if (v && typeof v === 'object' && !Array.isArray(v)) return v[l] != null ? v[l] : (v.sk != null ? v.sk : (v.en != null ? v.en : ''));
+      return v != null ? v : '';
+    }
+    function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+    function safeUrl(u) {
+      u = String(u || '').trim();
+      if (/^\s*javascript:/i.test(u)) return '#';
+      return u;
+    }
+    function getSiteUrl() {
+      if (location.protocol === 'http:' || location.protocol === 'https:') {
+        return location.origin + location.pathname.replace(/\/[^\/]*$/, '');
+      }
+      return '';
+    }
+    function showToast(msg) {
+      var el = document.getElementById('toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2200);
+    }
+    function setMeta(sel, val, attr, id) {
+      var el = id ? document.getElementById(id) : document.querySelector(sel);
+      if (el) el.setAttribute(attr || 'content', val || '');
+    }
+
+    /* slovenské skloňovanie: 1 projekt, 2–4 projekty, 5+ projektov */
+    function plProj(n, l) {
+      if (l === 'sk') return n === 1 ? 'projekt' : (n >= 2 && n <= 4 ? 'projekty' : 'projektov');
+      return n === 1 ? 'project' : 'projects';
+    }
+
+    function updateSeo() {
+      var m = P.meta || {};
+      var base = getSiteUrl();
+      var here = base ? base + '/projekty.html' : '';
+      var og = base ? base + '/og-image.svg' : '';
+      var desc = t(m.description, lang);
+      document.title = t(m.title, lang) || 'Projekty';
+      setMeta('meta[name="description"]', desc);
+      setMeta('meta[property="og:title"]', t(m.title, lang), 'content');
+      setMeta('meta[property="og:description"]', desc, 'content');
+      setMeta('meta[property="og:image"]', og, 'content', 'og-image');
+      setMeta('meta[name="twitter:image"]', og, 'content', 'tw-image');
+      setMeta('meta[property="og:url"]', here, 'content', 'og-url');
+      setMeta('link#canonical', here, 'href', 'canonical');
+
+      var old = document.getElementById('ld-projects');
+      if (old) old.remove();
+      var list = visibleProjects();
+      var script = document.createElement('script');
+      script.id = 'ld-projects';
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: t(m.title, lang),
+        description: desc,
+        url: here || undefined,
+        hasPart: (P.projects || []).map(function (p) {
+          return {
+            '@type': 'SoftwareSourceCode',
+            name: p.name,
+            description: t(p.short, lang),
+            codeRepository: p.repo || undefined,
+            url: p.live || p.repo || undefined,
+            programmingLanguage: p.lang || undefined
+          };
+        })
+      });
+      document.head.appendChild(script);
+      return list;
+    }
+
+    function visibleProjects() {
+      var all = P.projects || [];
+      return filter === 'all' ? all : all.filter(function (p) { return p.group === filter; });
+    }
+
+    function renderFilters() {
+      var groups = P.groups || [];
+      var all = P.projects || [];
+      var s = '<div class="filters rise d4" role="group" aria-label="' + (lang === 'sk' ? 'Filter kategórií' : 'Category filter') + '">';
+      s += '<button type="button" data-filter="all" class="' + (filter === 'all' ? 'is-active' : '') + '">'
+         + (lang === 'sk' ? 'Všetko' : 'All') + '<span class="count">' + all.length + '</span></button>';
+      groups.forEach(function (g) {
+        var n = all.filter(function (p) { return p.group === g.key; }).length;
+        if (!n) return;
+        s += '<button type="button" data-filter="' + esc(g.key) + '" class="' + (filter === g.key ? 'is-active' : '') + '">'
+           + esc(t(g.label, lang)) + '<span class="count">' + n + '</span></button>';
+      });
+      return s + '</div>';
+    }
+
+    function renderCard(p) {
+      var repo = safeUrl(p.repo || '');
+      var live = safeUrl(p.live || '');
+      var tags = (p.tags || []).map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
+      var meta = [];
+      if (p.year) meta.push(String(p.year));
+      if (p.lang) meta.push(esc(p.lang));
+      var s = '<article class="proj-card r-item' + (p.featured ? ' featured' : '') + '">';
+      s += '<div class="proj-head"><span class="proj-name">' + esc(p.name) + '</span>'
+         + (p.featured ? '<span class="proj-badge">' + (lang === 'sk' ? 'Hlavný' : 'Featured') + '</span>' : '')
+         + '</div>';
+      if (meta.length) s += '<div class="proj-meta">' + meta.join('<span class="dot-sep">·</span>') + '</div>';
+      if (t(p.short, lang)) s += '<p class="proj-short">' + esc(t(p.short, lang)) + '</p>';
+      if (t(p.desc, lang))  s += '<p class="proj-desc">' + esc(t(p.desc, lang)) + '</p>';
+      if (tags) s += '<div class="proj-tags">' + tags + '</div>';
+      s += '<div class="proj-links">';
+      if (repo) s += '<a href="' + esc(repo) + '" target="_blank" rel="noopener">GitHub &#8599;</a>';
+      if (live) s += '<a class="is-live" href="' + esc(live) + '" target="_blank" rel="noopener">'
+                   + (lang === 'sk' ? 'Živá stránka' : 'Live site') + ' &#8599;</a>';
+      s += '</div></article>';
+      return s;
+    }
+
+    function render() {
+      var m = P.meta || {};
+      var list = updateSeo();
+      var groups = P.groups || [];
+      var html = '';
+
+      html += '<header class="page-head">';
+      html += '<a class="back-link rise d1" href="index.html">&#8592; ' + esc(t(m.backLabel, lang)) + '</a>';
+      html += '<h1 class="rise d2">' + esc(t(m.heading, lang)) + '<span class="accent">.</span></h1>';
+      html += '<p class="page-lead rise d3">' + esc(t(m.lead, lang)) + '</p>';
+      html += renderFilters();
+      html += '</header>';
+
+      if (!list.length) {
+        html += '<div class="proj-empty">' + (lang === 'sk' ? 'V tejto kategórii zatiaľ nič nie je.' : 'Nothing in this category yet.') + '</div>';
+      } else if (filter === 'all') {
+        // pri "Všetko" držíme projekty zoskupené podľa kategórií
+        var num = 0;
+        groups.forEach(function (g) {
+          var items = list.filter(function (p) { return p.group === g.key; });
+          if (!items.length) return;
+          num++;
+          var n = (num < 10 ? '0' : '') + num;
+          html += '<section class="reveal" id="section-' + esc(g.key) + '"><div class="sec-head">'
+                + '<span class="sec-num">' + n + '</span>'
+                + '<span class="sec-title">' + esc(t(g.label, lang)) + '</span>'
+                + '<span class="sec-count">' + items.length + '</span></div>';
+          html += '<div class="proj-grid">' + items.map(renderCard).join('') + '</div></section>';
+        });
+      } else {
+        var g = groups.filter(function (x) { return x.key === filter; })[0];
+        html += '<section class="reveal" id="section-' + esc(filter) + '"><div class="sec-head">'
+              + '<span class="sec-num">01</span>'
+              + '<span class="sec-title">' + esc(g ? t(g.label, lang) : '') + '</span>'
+              + '<span class="sec-count">' + list.length + '</span></div>';
+        html += '<div class="proj-grid">' + list.map(renderCard).join('') + '</div></section>';
+      }
+
+      html += '<footer class="reveal"><span>&copy; ' + new Date().getFullYear() + ' Alex Poliak &middot; '
+            + (P.projects || []).length + ' ' + plProj((P.projects || []).length, lang) + '</span>';
+      html += '<span style="display:inline-flex;gap:18px;align-items:center">';
+      html += '<a href="' + esc(safeUrl(m.profileUrl || '')) + '" target="_blank" rel="noopener">github.com/Apoliak7777 &#8599;</a>';
+      html += '<button class="to-top" onclick="window.scrollTo({top:0,behavior:\'smooth\'})">' + (lang === 'sk' ? 'hore' : 'top') + ' &#8593;</button>';
+      html += '</span></footer>';
+
+      document.getElementById('app').innerHTML = html;
+      document.documentElement.lang = lang;
+      document.getElementById('btn-sk').classList.toggle('active', lang === 'sk');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+      observeReveals();
+      bindInteractions();
+    }
+
+    function observeReveals() {
+      if (!window.IntersectionObserver) {
+        document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+        return;
+      }
+      if (io) io.disconnect();
+      io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.08 });
+      document.querySelectorAll('.reveal').forEach(function (el) {
+        var kids = el.querySelectorAll('.proj-card');
+        Array.prototype.forEach.call(kids, function (k, i) { k.style.setProperty('--i', i); });
+        io.observe(el);
+      });
+    }
+
+    function bindInteractions() {
+      document.querySelectorAll('.filters button').forEach(function (btn) {
+        btn.onclick = function () {
+          filter = btn.getAttribute('data-filter') || 'all';
+          try { sessionStorage.setItem('proj_filter', filter); } catch (e) {}
+          render();
+          var head = document.querySelector('.page-head');
+          if (head) window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+      });
+      var fab = document.getElementById('fab-top');
+      if (fab) fab.onclick = function () { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    }
+
+    function onScroll() {
+      var st = document.documentElement.scrollTop || document.body.scrollTop;
+      var fab = document.getElementById('fab-top');
+      if (fab) fab.classList.toggle('show', st > 420);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    function setLang(l) {
+      lang = (l === 'en') ? 'en' : 'sk';
+      try { localStorage.setItem('cv_lang', lang); sessionStorage.setItem('cv_lang', lang); } catch (e) {}
+      render();
+    }
+
+    (function start() {
+      try {
+        var saved = null;
+        try { saved = sessionStorage.getItem('cv_lang') || localStorage.getItem('cv_lang'); } catch (e) {}
+        if (saved === 'en' || saved === 'sk') lang = saved;
+        try {
+          var f = sessionStorage.getItem('proj_filter');
+          if (f && (f === 'all' || (P.groups || []).some(function (g) { return g.key === f; }))) filter = f;
+        } catch (e) {}
+        render();
+      } catch (err) {
+        document.getElementById('app').innerHTML =
+          '<div style="padding:80px 0;color:#ff9d54;font:15px/1.6 monospace">Chyba pri načítaní projektov: '
+          + esc(err && err.message ? err.message : String(err)) + '</div>';
+        return;
+      }
+
+      function markLoaded() { document.body.classList.add('loaded'); }
+      if (window.requestAnimationFrame) {
+        requestAnimationFrame(function () { requestAnimationFrame(markLoaded); });
+      } else { markLoaded(); }
+      setTimeout(markLoaded, 400);
+
+      // núdzová poistka: keby niečo vo viewporte ostalo neviditeľné
+      setTimeout(function () {
+        var stuck = false;
+        // aj karty vnútri sekcií — sekcia môže byť odhalená a obsah zaseknutý
+        document.querySelectorAll('.rise, .reveal, .proj-card').forEach(function (el) {
+          var r = el.getBoundingClientRect();
+          if (r.top < window.innerHeight && r.bottom > 0 && getComputedStyle(el).opacity === '0') stuck = true;
+        });
+        if (stuck) document.body.classList.add('force');
+      }, 1400);
+    })();
+  </script>
+</body>
+</html>

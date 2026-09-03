@@ -29,502 +29,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 
-  <style>
-    :root {
-      --bg:        #0a0b0d;
-      --bg-grid:   rgba(255,255,255,0.02);
-      --surface:   #121318;
-      --surface-2: #16181e;
-      --surface-3: #1d2029;
-      --line:      #23262e;
-      --line-2:    #333844;
-      --text:      #f4f5f7;
-      --text-mid:  #a7abb5;
-      --text-dim:  #6a6e78;
-      --accent:    #d6ff4b;
-      --accent-2:  #ff9d54;
-      --accent-3:  #7cc5ff;
-      --glow:      color-mix(in srgb, var(--accent) 55%, transparent);
-      --radius:    16px;
-      --radius-sm: 10px;
-      --radius-xs: 8px;
-      --maxw:      860px;
-      --ease:      cubic-bezier(.22,.61,.36,1);
-      --shadow:    0 1px 0 rgba(255,255,255,.03) inset, 0 18px 40px -28px rgba(0,0,0,.9);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--text); }
-
-    body {
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-      position: relative;
-      min-height: 100vh;
-      background-color: var(--bg);
-      background-image: radial-gradient(var(--bg-grid) 1.3px, transparent 1.3px);
-      background-size: 26px 26px;
-      padding: 0 22px 90px;
-      overflow-x: hidden;
-    }
-    /* atmosféra — jemné akcentové prisvietenie zhora + vinieta zdola */
-    body::before {
-      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background:
-        radial-gradient(58% 40% at 15% -8%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
-        radial-gradient(52% 36% at 102% -2%, color-mix(in srgb, var(--accent-2) 8%, transparent), transparent 72%),
-        radial-gradient(90% 60% at 50% 118%, color-mix(in srgb, #000 60%, transparent), transparent 70%);
-    }
-    .wrap { max-width: var(--maxw); margin: 0 auto; position: relative; z-index: 1; }
-    code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-
-    .skip {
-      position: absolute; left: -9999px; top: auto; z-index: 50;
-      padding: 10px 16px; background: var(--accent); color: var(--bg);
-      border-radius: var(--radius-xs); font-weight: 600; text-decoration: none;
-    }
-    .skip:focus { left: 16px; top: 16px; outline: 2px solid var(--text); outline-offset: 2px; }
-
-    .toast {
-      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(16px);
-      background: var(--surface-2); border: 1px solid var(--line-2); color: var(--text);
-      padding: 11px 18px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
-      opacity: 0; pointer-events: none; z-index: 50; transition: opacity .22s var(--ease), transform .22s var(--ease);
-      box-shadow: 0 16px 40px -24px rgba(0,0,0,.9);
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    .jump-nav {
-      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 28px;
-    }
-    .jump-nav a {
-      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim);
-      text-decoration: none; padding: 7px 12px; border-radius: 999px;
-      border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 80%, transparent);
-      transition: color .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
-    }
-    .jump-nav a:hover, .jump-nav a:focus-visible { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
-    .jump-nav a.is-active {
-      color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight: 500;
-    }
-    .jump-nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    section[id^="section-"] { scroll-margin-top: 20px; }
-
-    .fab-top {
-      position: fixed; right: 20px; bottom: 22px; z-index: 35;
-      width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line-2);
-      background: color-mix(in srgb, var(--surface-2) 88%, transparent);
-      color: var(--text-mid); font-size: 18px; cursor: pointer;
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 12px 30px -18px rgba(0,0,0,.9);
-      opacity: 0; transform: translateY(10px); pointer-events: none;
-      transition: opacity .22s var(--ease), transform .22s var(--ease), color .18s var(--ease), border-color .18s var(--ease);
-    }
-    .fab-top.show { opacity: 1; transform: none; pointer-events: auto; }
-    .fab-top:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
-    .fab-top:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    /* scroll-progress prúžok navrchu */
-    .progress {
-      position: fixed; top: 0; left: 0; height: 2px; width: 0%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      z-index: 40; transition: width .1s linear; box-shadow: 0 0 12px var(--glow);
-    }
-
-    /* prepínač jazyka */
-    .lang {
-      position: fixed; top: 18px; right: 20px;
-      display: inline-flex; background: color-mix(in srgb, var(--surface) 78%, transparent);
-      border: 1px solid var(--line); border-radius: 999px; padding: 3px; z-index: 30;
-      font-family: 'JetBrains Mono', monospace; font-size: 13px;
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 8px 24px -16px rgba(0,0,0,.8);
-    }
-    .lang button {
-      appearance: none; border: none; background: transparent; color: var(--text-dim);
-      padding: 6px 14px; border-radius: 999px; cursor: pointer;
-      font-family: inherit; font-size: inherit;
-      transition: color .18s var(--ease), background .18s var(--ease);
-    }
-    .lang button:hover { color: var(--text-mid); }
-    .lang button.active { background: var(--accent); color: var(--bg); font-weight: 500; }
-    .lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    /* nábehy */
-    .rise { opacity: 0; transform: translateY(16px); }
-    .loaded .rise { opacity: 1; transform: none; transition: opacity .7s var(--ease), transform .7s var(--ease); }
-    .loaded .rise.d1 { transition-delay: .05s; }
-    .loaded .rise.d2 { transition-delay: .12s; }
-    .loaded .rise.d3 { transition-delay: .19s; }
-    .loaded .rise.d4 { transition-delay: .26s; }
-    .loaded .rise.d5 { transition-delay: .33s; }
-    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
-    .reveal.in { opacity: 1; transform: none; }
-    /* núdzová poistka: ak animácie z akéhokoľvek dôvodu nenabehnú, JS pridá .force a všetko sa zobrazí */
-    body.force .rise, body.force .reveal { opacity: 1 !important; transform: none !important; }
-
-    /* hero */
-    .hero { padding: 92px 0 46px; }
-    .hero-top { display: flex; align-items: center; gap: 18px; margin-bottom: 30px; flex-wrap: wrap; }
-    .avatar {
-      width: 66px; height: 66px; border-radius: 50%;
-      object-fit: cover; border: 1px solid var(--line-2);
-      background: var(--surface-2); flex-shrink: 0;
-    }
-    /* monogram fallback keď nie je fotka */
-    .monogram {
-      width: 66px; height: 66px; border-radius: 50%; flex-shrink: 0;
-      display: grid; place-items: center;
-      font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 24px;
-      color: var(--bg); letter-spacing: -0.02em;
-      background: linear-gradient(140deg, var(--accent), color-mix(in srgb, var(--accent-2) 80%, var(--accent)));
-      box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent), 0 12px 30px -14px var(--glow);
-    }
-    .status {
-      display: inline-flex; align-items: center; gap: 9px;
-      font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-mid);
-      background: var(--surface); border: 1px solid var(--line);
-      padding: 7px 14px; border-radius: 999px;
-    }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
-    .dot.on { background: var(--accent); box-shadow: 0 0 0 0 var(--accent); animation: pulse 2.4s infinite; }
-    @keyframes pulse {
-      0%   { box-shadow: 0 0 0 0 var(--glow); }
-      70%  { box-shadow: 0 0 0 9px transparent; }
-      100% { box-shadow: 0 0 0 0 transparent; }
-    }
-
-    .hero h1 {
-      font-size: clamp(48px, 9.4vw, 92px);
-      font-weight: 700; line-height: 0.95; letter-spacing: -0.038em;
-      color: var(--text); /* bezpečný základ — text je viditeľný vždy */
-    }
-    /* gradientový nadpis len tam, kde ho prehliadač naozaj vie (bez color-mix, nech nič nezneviditeľní) */
-    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-      .hero h1 {
-        background: linear-gradient(180deg, #f4f5f7 55%, #b9bdc7);
-        -webkit-background-clip: text; background-clip: text;
-        -webkit-text-fill-color: transparent; color: transparent;
-      }
-    }
-    .hero h1 .accent {
-      -webkit-text-fill-color: var(--accent); color: var(--accent);
-    }
-    .hero .role {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(15px, 2.4vw, 19px); color: var(--accent-2); margin-top: 22px;
-    }
-    .hero .bio { font-size: clamp(16px, 2.6vw, 19px); color: var(--text-mid); max-width: 60ch; margin-top: 20px; }
-
-    .links { display: flex; gap: 11px; margin-top: 32px; flex-wrap: wrap; align-items: center; }
-    .links a {
-      font-family: 'JetBrains Mono', monospace; font-size: 14px;
-      padding: 10px 17px; background: var(--surface); border: 1px solid var(--line);
-      border-radius: var(--radius-sm); color: var(--text); text-decoration: none;
-      transition: border-color .18s var(--ease), color .18s var(--ease), transform .18s var(--ease), background .18s var(--ease);
-    }
-    .links a:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
-    .links a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .links .share-link {
-      appearance: none; font-family: 'JetBrains Mono', monospace; font-size: 14px;
-      padding: 10px 17px; background: var(--surface); border: 1px solid var(--line);
-      border-radius: var(--radius-sm); color: var(--text); cursor: pointer;
-      transition: border-color .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
-    }
-    .links .share-link:hover { border-color: var(--accent-3); color: var(--accent-3); transform: translateY(-2px); }
-    .links .share-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .links a.cv {
-      background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 500;
-      box-shadow: 0 12px 30px -16px var(--glow);
-    }
-    .links a.cv:hover { color: var(--bg); filter: brightness(1.06); transform: translateY(-2px); }
-
-    /* highlights — štatistiky z dát */
-    .stats {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 40px;
-    }
-    .stat {
-      background: linear-gradient(180deg, var(--surface), var(--surface-2));
-      border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px;
-      box-shadow: var(--shadow);
-    }
-    .stat-num {
-      font-size: clamp(26px, 5vw, 34px); font-weight: 700; letter-spacing: -0.03em; line-height: 1;
-      color: var(--text);
-    }
-    .stat-num .plus { color: var(--accent); }
-    .stat-label {
-      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim);
-      text-transform: uppercase; letter-spacing: 0.08em; margin-top: 9px;
-    }
-
-    /* sekcie */
-    section { padding-top: 60px; }
-    .sec-head {
-      display: flex; align-items: baseline; gap: 14px; margin-bottom: 28px;
-      border-top: 1px solid var(--line); padding-top: 24px;
-    }
-    .sec-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 500; }
-    .sec-title {
-      font-size: 14px; font-weight: 500; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--text-dim);
-    }
-    .sec-count {
-      margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px;
-      color: var(--text-dim); align-self: center;
-    }
-
-    /* skúsenosti — časová os */
-    .timeline { position: relative; }
-    .timeline::before {
-      content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 1px;
-      background: linear-gradient(var(--line-2), var(--line-2) 70%, transparent);
-    }
-    .exp { display: grid; grid-template-columns: 13px 1fr; gap: 22px; padding: 6px 0 28px; }
-    .exp:last-child { padding-bottom: 0; }
-    .exp-mark {
-      width: 13px; height: 13px; border-radius: 50%; margin-top: 6px;
-      background: var(--bg); border: 2px solid var(--line-2); position: relative; z-index: 1;
-      transition: border-color .22s var(--ease), box-shadow .22s var(--ease);
-    }
-    .exp:hover .exp-mark { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); }
-    .exp.is-current .exp-mark {
-      border-color: var(--accent); background: var(--accent);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent), 0 0 16px var(--glow);
-    }
-    .exp-now {
-      display: inline-block; margin-left: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
-      color: var(--bg); background: var(--accent); padding: 2px 8px; border-radius: 999px; font-weight: 500;
-      vertical-align: middle; letter-spacing: 0.04em; text-transform: uppercase;
-    }
-    .edu.is-current .edu-title::after {
-      content: attr(data-now); margin-left: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
-      color: var(--bg); background: var(--accent-3); padding: 2px 8px; border-radius: 999px; font-weight: 500;
-      vertical-align: middle; letter-spacing: 0.04em; text-transform: uppercase;
-    }
-    .exp-when { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
-    .exp-title { font-size: 19px; font-weight: 500; margin-top: 5px; }
-    .exp-company { color: var(--accent-2); font-size: 15px; margin: 2px 0 9px; }
-    .exp-desc { color: var(--text-mid); font-size: 15px; }
-
-    /* projekty */
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(248px, 1fr)); gap: 14px; }
-    .project {
-      position: relative; background: linear-gradient(180deg, var(--surface), var(--surface-2));
-      border: 1px solid var(--line); box-shadow: var(--shadow);
-      border-radius: var(--radius); padding: 22px; text-decoration: none; color: inherit;
-      overflow: hidden; transition: border-color .22s var(--ease), transform .22s var(--ease), box-shadow .22s var(--ease);
-    }
-    .project::after {
-      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
-      background: radial-gradient(80% 60% at 100% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 60%);
-      transition: opacity .28s var(--ease);
-    }
-    .project::before {
-      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-      background: var(--accent); transform: scaleY(0); transform-origin: top;
-      transition: transform .28s var(--ease);
-    }
-    .project.featured {
-      border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
-      background: linear-gradient(165deg, color-mix(in srgb, var(--accent) 6%, var(--surface)), var(--surface-2));
-    }
-    .project.featured::before { transform: scaleY(1); opacity: .85; }
-    .project-badge {
-      font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--bg); background: var(--accent);
-      padding: 3px 8px; border-radius: 999px; font-weight: 500; flex-shrink: 0;
-    }
-    .project:hover { border-color: var(--line-2); transform: translateY(-4px); box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 26px 50px -30px rgba(0,0,0,.9); }
-    .project:hover::before { transform: scaleY(1); }
-    .project:hover::after { opacity: 1; }
-    .project:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .project-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; position: relative; }
-    .project-head-right { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .project-title { font-size: 18px; font-weight: 500; }
-    .project-arrow { font-family: 'JetBrains Mono', monospace; color: var(--text-dim); font-size: 18px; transition: color .22s var(--ease), transform .22s var(--ease); }
-    .project:hover .project-arrow { color: var(--accent); transform: translate(3px,-3px); }
-    .project-desc { color: var(--text-mid); font-size: 15px; margin-top: 9px; position: relative; }
-    .project-tags { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 16px; position: relative; }
-    .project-tags span {
-      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-mid);
-      background: color-mix(in srgb, var(--surface-3) 70%, transparent); border: 1px solid var(--line);
-      padding: 3px 9px; border-radius: 999px;
-    }
-
-    /* schopnosti */
-    .skill-rows { display: flex; flex-direction: column; }
-    .skill {
-      display: flex; align-items: baseline; gap: 16px; padding: 15px 0;
-      border-top: 1px dashed var(--line); transition: padding-left .2s var(--ease);
-    }
-    .skill:first-child { border-top: none; }
-    .skill:hover { padding-left: 6px; }
-    .skill-name { font-size: 17px; font-weight: 500; min-width: 170px; }
-    .skill-name::before { content: "▹ "; color: var(--accent); }
-    .skill-detail { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text-mid); }
-
-    /* záujmy */
-    .interest-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
-    .interest {
-      padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius-sm);
-      background: var(--surface); transition: border-color .2s var(--ease), transform .2s var(--ease);
-    }
-    .interest:hover { border-color: color-mix(in srgb, var(--accent-3) 45%, var(--line)); transform: translateY(-2px); }
-    .interest-name { font-size: 16px; font-weight: 500; }
-    .interest-name::before { content: "◆ "; color: var(--accent-3); font-size: 12px; }
-    .interest-detail { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-mid); margin-top: 6px; line-height: 1.55; }
-
-    /* vzdelanie */
-    .edu { padding: 18px 0; border-top: 1px solid var(--line); }
-    .edu:first-child { border-top: none; }
-    .edu-when { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
-    .edu-title { font-size: 18px; font-weight: 500; margin-top: 4px; }
-    .edu-place { color: var(--accent-2); font-size: 15px; margin: 2px 0 6px; }
-    .edu-desc { color: var(--text-mid); font-size: 15px; }
-
-    /* certifikáty — zoskupené podľa vydavateľa */
-    .cert-group { padding: 22px 0; border-top: 1px solid var(--line); }
-    .cert-group:first-child { border-top: none; padding-top: 4px; }
-    .cert-group-head { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; flex-wrap: wrap; }
-    .cert-issuer-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--cg, var(--accent)); box-shadow: 0 0 10px color-mix(in srgb, var(--cg, var(--accent)) 60%, transparent); }
-    .cert-issuer { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
-    .cert-when { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); }
-    .cert-badge {
-      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cg, var(--accent));
-      border: 1px solid color-mix(in srgb, var(--cg, var(--accent)) 40%, var(--line));
-      background: color-mix(in srgb, var(--cg, var(--accent)) 8%, transparent);
-      padding: 2px 8px; border-radius: 999px;
-    }
-    .cert-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 9px; }
-    .cert-chip {
-      display: flex; align-items: flex-start; gap: 10px;
-      background: linear-gradient(180deg, var(--surface), var(--surface-2));
-      border: 1px solid var(--line); border-radius: var(--radius-xs); padding: 12px 14px;
-      transition: border-color .2s var(--ease), transform .2s var(--ease);
-    }
-    .cert-chip.is-hidden { display: none; }
-    .cert-group.is-expanded .cert-chip.is-hidden { display: flex; }
-    .cert-chip:hover { border-color: color-mix(in srgb, var(--cg, var(--accent)) 55%, var(--line)); transform: translateY(-2px); }
-    a.cert-chip { text-decoration: none; color: inherit; cursor: pointer; }
-    a.cert-chip:hover .cert-name { color: var(--cg, var(--accent)); }
-    .cert-more {
-      margin-top: 10px; appearance: none; border: 1px dashed var(--line-2); background: transparent;
-      color: var(--text-mid); font-family: 'JetBrains Mono', monospace; font-size: 12px;
-      padding: 8px 14px; border-radius: 999px; cursor: pointer;
-      transition: color .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
-    }
-    .cert-more:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: color-mix(in srgb, var(--accent) 6%, transparent); }
-    .cert-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .cert-tick { color: var(--cg, var(--accent)); font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.5; flex-shrink: 0; }
-    .cert-name { font-size: 14px; color: var(--text); line-height: 1.4; }
-
-    /* pätička */
-    footer {
-      margin-top: 74px; padding-top: 26px; border-top: 1px solid var(--line);
-      font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim);
-      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
-    }
-    footer a { color: var(--text-mid); text-decoration: none; transition: color .18s var(--ease); }
-    footer a:hover { color: var(--accent); }
-    .to-top {
-      display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
-      background: none; border: none; font: inherit; color: var(--text-dim);
-    }
-    .to-top:hover { color: var(--accent); }
-
-    @media (max-width: 560px) {
-      .stats { grid-template-columns: 1fr 1fr; }
-      .stats .stat:nth-child(3) { grid-column: 1 / -1; }
-      .skill { flex-direction: column; gap: 4px; }
-      .skill-name { min-width: 0; }
-      .hero { padding-top: 80px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after { animation: none !important; transition: none !important; }
-      .rise, .reveal { opacity: 1 !important; transform: none !important; }
-    }
-
-    /* tlač / uloženie do PDF cez prehliadač */
-    /* ---- tlač do PDF ----------------------------------------------------
-       Nie holý text: paleta sa len preloží do tlačovej verzie (akcenty stmavené,
-       aby boli na bielom čitateľné) a zvyšok dizajnu — monogram, čísla sekcií,
-       badge, karty, časová os — ostáva tak, ako ho vidno na webe. */
-    @page { margin: 14mm 13mm; }
-    @media print {
-      /* !important je tu nutné: render() zapisuje --accent/-2/-3 z content.js
-         priamo do inline style na <html>, čo by tlačovú paletu inak prebilo
-         a akcenty by ostali svetlé (na bielom nečitateľné). */
-      :root {
-        --bg: #ffffff !important; --surface: #ffffff !important; --surface-2: #ffffff !important; --surface-3: #f4f4f2 !important;
-        --line: #d9dbd6 !important; --line-2: #c2c5be !important;
-        --text: #14161a !important; --text-mid: #4a4e57 !important; --text-dim: #71757e !important;
-        --accent: #4f6b00 !important; --accent-2: #a8500a !important; --accent-3: #14618f !important;
-        --glow: transparent !important;
-        --shadow: none !important;
-      }
-      html, body {
-        background: #fff !important; background-image: none !important;
-        color: var(--text); padding: 0; font-size: 10.5pt;
-        -webkit-print-color-adjust: exact; print-color-adjust: exact;
-      }
-      body::before, .lang, .progress, .to-top, .fab-top, .jump-nav, .toast,
-      .cert-more, .share-link, .print-cv, .skip { display: none !important; }
-      .cert-chip.is-hidden { display: flex !important; }
-      .wrap { max-width: 100%; }
-      .reveal, .rise { opacity: 1 !important; transform: none !important; animation: none !important; }
-      .stat-val { opacity: 1 !important; }
-
-      /* hlavička na jednu stranu, meno nezalomené na dva riadky zbytočne */
-      .hero { padding: 0 0 10px !important; }
-      .hero h1 { -webkit-text-fill-color: var(--text); color: var(--text); font-size: 30pt; line-height: 1.05; }
-      .hero h1 .accent { -webkit-text-fill-color: var(--accent); color: var(--accent); }
-      .bio { font-size: 10.5pt; margin-top: 12px; max-width: 100%; }
-      .monogram { width: 54px; height: 54px; font-size: 20px; box-shadow: none; }
-      .dot { animation: none !important; box-shadow: none !important; }
-      .links { margin-top: 16px; gap: 8px; }
-      .links a { border-color: var(--line); color: var(--text); padding: 5px 10px; }
-
-      /* kompaktnejšie rozostupy — na papieri nie je dôvod na vzduch ako na webe */
-      section { padding-top: 26px; }
-      .sec-head { margin-bottom: 12px; }
-      .exp { padding: 4px 0 14px; gap: 16px; }
-      .cert-group { padding: 12px 0; }
-      .skill { padding: 8px 0; }
-      .stats { margin-top: 18px; padding: 12px 0; }
-      .stat-num { font-size: 22pt; }
-
-      /* karty a bloky bez tieňov, s tlačovým rámikom */
-      .project, .status, .stat, .cert-chip, .interest, .cert-group {
-        box-shadow: none !important; background: #fff !important;
-      }
-      .project::before, .project::after { display: none !important; }
-
-      /* nič sa nesmie roztrhnúť cez zlom strany */
-      section, .exp, .project, .edu, .skill, .interest, .cert-group, .stats {
-        break-inside: avoid; page-break-inside: avoid;
-      }
-      .sec-head { break-after: avoid; page-break-after: avoid; }
-
-      /* odkazy: adresu vypíšeme za text, inak je v papierovej verzii stratená */
-      a[href^="http"]::after {
-        content: " (" attr(href) ")";
-        font-family: 'JetBrains Mono', monospace; font-size: 8pt; color: var(--text-dim); word-break: break-all;
-      }
-      .links a[href^="http"]::after, .jump-nav a::after, .cert-chip::after { content: none; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <a class="skip" href="#app">Preskočiť na obsah / Skip to content</a>
-  <div class="progress" id="progress" aria-hidden="true"></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <button type="button" class="fab-top" id="fab-top" aria-label="Späť hore / Back to top" title="Späť hore / Back to top">&#8593;</button>
@@ -775,6 +283,13 @@
               + '<span class="sec-title">' + esc(t(cfg.label, lang)) + '</span>'
               + '<span class="sec-count">' + items.length + '</span></div>';
         html += renderSection(key, items);
+        // voliteľný odkaz pod sekciou (napr. "Pozrieť všetky projekty")
+        if (cfg.more && cfg.more.url) {
+          html += '<a class="all-projects" href="' + esc(safeUrl(cfg.more.url)) + '">'
+                + esc(t(cfg.more.label, lang))
+                + (cfg.more.count ? '<span class="n">' + esc(String(cfg.more.count)) + '</span>' : '')
+                + ' &#8594;</a>';
+        }
         html += '</section>';
       });
 
@@ -822,7 +337,10 @@
     function renderStats() {
       var cells = [];
       var exp = (D.experience || []).length;
-      var proj = (D.projects || []).length;
+      // na hlavnej je len výber projektov — počítadlo hlási skutočný počet
+      // z podstránky (sections.projects.more.count), ak je nastavený
+      var projMore = ((D.sections || {}).projects || {}).more || {};
+      var proj = projMore.count || (D.projects || []).length;
       var certs = (D.certificates || []).length;
       if (exp)  cells.push({ n: exp, label: lang === 'sk' ? 'Pracovné skúsenosti' : 'Work experiences' });
       if (certs) cells.push({ n: certs, plus: true, label: lang === 'sk' ? 'Certifikátov' : 'Certificates' });
@@ -967,7 +485,15 @@
       io = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
       }, { threshold: 0.12 });
-      document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+      document.querySelectorAll('.reveal').forEach(function (el) {
+        // položkám v sekcii dáme poradie, aby po odhalení prilietali jedna po druhej
+        var kids = el.querySelectorAll('.exp, .project, .skill, .edu, .cert-group, .interest');
+        Array.prototype.forEach.call(kids, function (k, i) {
+          k.classList.add('r-item');
+          k.style.setProperty('--i', i);
+        });
+        io.observe(el);
+      });
     }
 
     function observeScrollSpy() {
@@ -1029,12 +555,9 @@
       statsIO.observe(box);
     }
 
-    // scroll-progress + plávajúce tlačidlo hore
+    // plávajúce tlačidlo hore
     function onScroll() {
       var st = document.documentElement.scrollTop || document.body.scrollTop;
-      var h = (document.documentElement.scrollHeight - document.documentElement.clientHeight) || 1;
-      var p = Math.min(100, Math.max(0, (st / h) * 100));
-      var bar = document.getElementById('progress'); if (bar) bar.style.width = p + '%';
       var fab = document.getElementById('fab-top');
       if (fab) fab.classList.toggle('show', st > 420);
     }
@@ -1136,7 +659,9 @@
       // (zaseknuté animácie, starý prehliadač...), zobraz všetko natvrdo
       setTimeout(function () {
         var stuck = false;
-        document.querySelectorAll('.rise, .reveal').forEach(function (el) {
+        // kontrolujeme aj položky vnútri sekcií (.r-item) — sekcia môže byť
+        // odhalená, ale jej obsah zaseknutý na opacity 0
+        document.querySelectorAll('.rise, .reveal, .r-item').forEach(function (el) {
           var r = el.getBoundingClientRect();
           var inView = r.top < window.innerHeight && r.bottom > 0;
           if (inView && getComputedStyle(el).opacity === '0') stuck = true;

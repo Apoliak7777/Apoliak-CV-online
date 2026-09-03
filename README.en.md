@@ -8,7 +8,7 @@
 
 # 🪪 Apoliak CV online
 
-**A static bilingual (SK/EN) online CV and portfolio — three files, no framework, no build.**
+**A static bilingual (SK/EN) online CV and portfolio — two pages, no framework, no build.**
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
@@ -41,7 +41,7 @@
 
 A personal portfolio and online résumé built as a single static page. All content lives in a plain JavaScript object `window.CV_DATA` inside `content.js`; `index.html` contains the complete markup, CSS and rendering JavaScript inline — it reads the data object and assembles the whole page as an HTML string at runtime.
 
-The goal is zero operational overhead: there is no package manager, no build step, no backend and no database. Editing the CV means editing one object in `content.js` and refreshing the browser. Hosting means uploading three files (`index.html`, `content.js`, `og-image.svg`) to any static host.
+The goal is zero operational overhead: there is no package manager, no build step, no backend and no database. Editing the CV means editing one object in `content.js` and refreshing the browser. Hosting means uploading six files (`index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js`, `og-image.svg`) to any static host.
 
 The site is bilingual from the ground up — every piece of text is a `{ sk, en }` pair, and switching the language simply re-runs `render()`, without a reload.
 
@@ -59,7 +59,9 @@ The site is bilingual from the ground up — every piece of text is a `{ sk, en 
 - 🎯 **Monogram favicon** — an SVG data URI is generated from the initials of the name and the configured accent colour, replacing the fallback in `<head>`.
 - 🖼️ **Avatar fallback** — when `meta.photo` is filled in, an `<img>` is rendered; otherwise a gradient monogram from the initials.
 - 📋 **Copy to clipboard** — the `share` button copies the page URL, and the e-mail in the footer copies the address; both with a toast confirmation and a fallback (a toast containing the URL, or `mailto:` respectively).
-- 🧭 **Scroll UX** — a top progress bar, a jump nav with scroll-spy via `IntersectionObserver`, and a floating back-to-top button.
+- 🧭 **Scroll UX** — a jump nav with scroll-spy via `IntersectionObserver` and a floating back-to-top button.
+- ✨ **Scroll reveals** — a section does not appear all at once: its top rule stretches out, the section number arrives from the left, the vertical timeline rule is drawn in, and the items fly in one after another (the order is held by the CSS variable `--i`, assigned by `observeReveals()`).
+- 🗃️ **A dedicated projects page** — `projekty.html` lists every public GitHub project, sorted into categories, with a filter that remembers its choice in `sessionStorage` and its own `CollectionPage` JSON-LD block.
 - 🖨️ **Print to PDF straight from the page** — the *Download CV (PDF)* button calls `window.print()` and the `@media print` stylesheet turns the site into a finished document: darkened accents readable on white, the monogram, section numbers, badges and cards preserved, tightened spacing, `break-inside: avoid` against page-break tearing, external link addresses printed inline, and **all hidden certificates expanded**.
 - ♿ **Accessibility** — a skip-to-content link, a `role="status" aria-live="polite"` toast, `aria-label` on the language switcher and the navigation, visible `:focus-visible` outlines and a full `prefers-reduced-motion` block.
 - 🛟 **Failure resilience** — a visible `Načítavam CV… / Loading…` boot state, a `<noscript>` message, a try/catch around startup that prints the error straight onto the page instead of showing a black screen, a fallback for when `IntersectionObserver` is missing, and a 1.4 s safety net that adds `body.force` and forcibly reveals anything stuck at `opacity: 0`.
@@ -98,9 +100,11 @@ npx serve .
 
 ```text
 Apoliak-CV-online/
-├── index.html      # the whole app: <head> with SEO placeholders, inline <style>
-│                   # (~420 lines of design system) and inline <script> (~540 lines of renderer)
-├── content.js      # the ONLY file you edit when changing content — window.CV_DATA
+├── index.html      # the CV: <head> with SEO placeholders + the inline renderer <script>
+├── projekty.html   # the sub-page listing every public GitHub project
+├── style.css       # the design system — shared by both pages
+├── content.js      # the CV content — window.CV_DATA
+├── projects.js     # the projects page content — window.PROJECTS_DATA
 ├── og-image.svg    # hand-written 1200x630 preview card for link sharing
 ├── README.md       # the Slovak original (the site does not load it, it is not needed for hosting)
 └── README.en.md    # this file — the English translation
@@ -147,6 +151,7 @@ The entire configuration lives in the `meta` block in `content.js`. No environme
 | `hero.available`                  | `true`             | enables the pulsing availability dot in the `meta.accent` colour                                                                                                                    |
 | `sections.order`                  | array of 6 keys    | the order of the sections on the page                                                                                                                                               |
 | `sections.<key>.show`             | `true`             | turns a section off without deleting its data                                                                                                                                       |
+| `sections.<key>.more`             | projects only      | `{ url, count, label }` — renders a button to the sub-page below the section. `count` also overrides the counter (the home page only shows a selection, the counter reports the real total) |
 
 > [!NOTE]
 > The main tuning constant outside `content.js` is `CERT_PREVIEW = 5` in the inline script of `index.html` — how many certificates per issuer are shown before the *Show N more* button. Besides it, `index.html` also hardcodes the fallback favicon (the "AP" monogram and the colour `#d6ff4b`), the static `<title>Portfólio</title>`, `theme-color` (a static value in `<head>` that `render()` overwrites with the computed `body` background), `og:locale` (`sk_SK`), the OG image dimensions, the `SK` country in the JSON-LD address and the entire `:root` fallback palette, whose `--accent` / `--accent-2` / `--accent-3` duplicate the values from `content.js`.
@@ -196,7 +201,7 @@ The `@media print` stylesheet takes care of how the result looks. It does not re
 - accents are darkened (`#4f6b00`, `#a8500a`, `#14618f`) so they stay readable on white, while the monogram, section numbers, badges, cards and the timeline all remain;
 - spacing tightens up, `@page` uses 14 × 13 mm margins, and `print-color-adjust: exact` keeps the browser from dropping the colours;
 - `break-inside: avoid` holds individual entries together so they do not fall apart across a page break;
-- the controls (language switcher, jump nav, progress bar, buttons) are hidden and **all hidden certificates are expanded**;
+- the controls (language switcher, jump nav, buttons) are hidden and **all hidden certificates are expanded**;
 - external links get their address printed after the text — on paper it would otherwise be lost.
 
 > [!IMPORTANT]
@@ -206,7 +211,7 @@ The `@media print` stylesheet takes care of how the result looks. It does not re
 
 ## 🌐 Deployment
 
-Upload the three files — `index.html`, `content.js` and `og-image.svg` — exactly as they are to any static host: GitHub Pages, Netlify, Vercel, plain nginx or Apache. You can upload `README.md` and `README.en.md` as well; the site does not use them. No PHP, no database, no runtime environment.
+Upload all six files — `index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js` and `og-image.svg` — exactly as they are to any static host: GitHub Pages, Netlify, Vercel, plain nginx or Apache. You can upload `README.md` and `README.en.md` as well; the site does not use them. No PHP, no database, no runtime environment.
 
 Before deploying:
 

@@ -40,7 +40,10 @@ window.CV_DATA = {
   sections: {
     order: ["experience", "projects", "skills", "education", "certificates", "interests"],
     experience:   { show: true, label: { sk: "Skúsenosti", en: "Experience" } },
-    projects:     { show: true, label: { sk: "Projekty", en: "Projects" } },
+    projects:     { show: true, label: { sk: "Projekty", en: "Projects" },
+                    /* odkaz pod sekciou na podstránku so všetkými projektami */
+                    more: { url: "projekty.html", count: 21,
+                            label: { sk: "Pozrieť všetky projekty", en: "See all projects" } } },
     skills:       { show: true, label: { sk: "Schopnosti", en: "Skills" } },
     education:    { show: true, label: { sk: "Vzdelanie", en: "Education" } },
     certificates: { show: true, label: { sk: "Certifikáty", en: "Certificates" } },
@@ -90,9 +93,46 @@ window.CV_DATA = {
       tags: ["HTML", "CSS", "JavaScript", "Open Source"]
     },
     {
+      featured: true,
+      title: { sk: "apoliak.online — môj freelance web", en: "apoliak.online — My Freelance Site" },
+      desc: { sk: "Web mojej služby tvorby stránok pre malé podniky, aj s galériou dvadsiatich preklikateľných ukážkových webov. Čisté HTML, CSS a vanilla JavaScript na vlastnej doméne.", en: "The site for my web-building service for small businesses, including a gallery of twenty clickable demo sites. Plain HTML, CSS and vanilla JavaScript on my own domain." },
+      url: "https://apoliak.online/",
+      tags: ["HTML", "CSS", "JavaScript", "20 ukážok", "Vlastná doména"]
+    },
+    {
+      title: { sk: "Gloworm — multiplayer hra v prehliadači", en: "Gloworm — Browser Multiplayer Game" },
+      desc: { sk: "Neónová 3D aréna pre viacerých hráčov naraz, priamo v prehliadači. Three.js cez React Three Fiber, synchronizácia hráčov cez Socket.IO, celé v TypeScripte.", en: "A neon 3D arena for several players at once, right in the browser. Three.js via React Three Fiber, player sync over Socket.IO, all in TypeScript." },
+      url: "https://github.com/Apoliak7777/gloworm",
+      tags: ["TypeScript", "Three.js", "Socket.IO", "WebGL", "Multiplayer"]
+    },
+    {
+      title: { sk: "ConsoleDex — databáza herných konzol", en: "ConsoleDex — Game Console Database" },
+      desc: { sk: "Katalóg všetkých herných konzol, čo kedy vyšli — 70 konzol od 24 výrobcov od roku 1972. Filtrovanie, porovnávanie a dvojjazyčné rozhranie bez servera.", en: "A catalogue of every game console ever made — 70 consoles from 24 makers since 1972. Filtering, comparison and a bilingual interface with no server." },
+      url: "https://apoliak7777.github.io/ConsoleDex/",
+      tags: ["JavaScript", "Dvojjazyčné", "70 konzol", "Live"]
+    },
+    {
+      title: { sk: "Odrátané hodiny — evidencia šichiet", en: "Odrátané hodiny — Shift Tracker" },
+      desc: { sk: "Appka na zapisovanie odpracovaných šichiet a kontrolu výplaty. Dopočíta príplatky, pozná sviatky, rozumie rýchlemu zápisu textom a funguje úplne offline.", en: "An app for logging worked shifts and checking your payslip. It calculates weekend rates, knows public holidays, understands quick text entry and works fully offline." },
+      url: "https://apoliak7777.github.io/odratane-hodiny/",
+      tags: ["Vanilla JS", "Offline-first", "PWA", "Live"]
+    },
+    {
+      title: { sk: "ApoliakOS & FileFlow — nástroje pre Windows", en: "ApoliakOS & FileFlow — Windows Tools" },
+      desc: { sk: "Dva desktopové nástroje: ApoliakOS je optimalizátor Windows 11 v PowerShelli (súkromie, výkon, branding), FileFlow je Python triedič súborov so sledovaním priečinkov, distribuovaný ako .exe.", en: "Two desktop tools: ApoliakOS is a Windows 11 optimizer in PowerShell (privacy, performance, branding), FileFlow is a Python file organizer with live folder watching, shipped as an .exe." },
+      url: "https://github.com/Apoliak7777/FileFlow",
+      tags: ["Python", "PowerShell", "CustomTkinter", "Windows"]
+    },
+    {
+      title: { sk: "Toto portfólio (cvonline)", en: "This Portfolio (cvonline)" },
+      desc: { sk: "Statické dvojjazyčné CV/portfólio bez frameworku — obsah v jednom súbore, tmavý dizajn, SEO, tlač do PDF a pripravené na bezplatný hosting.", en: "Static bilingual CV/portfolio without a framework — content in a single file, dark design, SEO, print-to-PDF and ready for free hosting." },
+      url: "https://github.com/Apoliak7777/Apoliak-CV-online",
+      tags: ["HTML", "CSS", "JavaScript", "Open Source"]
+    },
+    {
       title: { sk: "AI Prompt Engineering & vlastní AI asistenti", en: "AI Prompt Engineering & Custom AI Assistants" },
       desc: { sk: "Intenzívne testovanie a tvorba efektívnych promptov pre ChatGPT a Claude. Vlastní AI asistenti, workflow automatizácia a 17+ certifikátov z oblasti AI.", en: "Intensive testing and creation of effective prompts for ChatGPT and Claude. Custom AI assistants, workflow automation and 17+ AI certificates." },
-      url: "",
+      url: "https://github.com/Apoliak7777/AI-Promt-Manager",
       tags: ["AI", "Prompt Engineering", "Claude", "GPTs", "MCP"]
     }
   ],

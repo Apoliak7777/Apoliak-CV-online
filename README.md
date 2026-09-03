@@ -8,7 +8,7 @@
 
 # 🪪 Apoliak CV online
 
-**Statické dvojjazyčné (SK/EN) online CV a portfólio — tri súbory, žiadny framework, žiadny build.**
+**Statické dvojjazyčné (SK/EN) online CV a portfólio — dve stránky, žiadny framework, žiadny build.**
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
@@ -41,7 +41,7 @@
 
 Osobné portfólio a online životopis ako jedna statická stránka. Všetok obsah žije v obyčajnom JavaScript objekte `window.CV_DATA` v súbore `content.js`; `index.html` obsahuje kompletné markup, CSS aj renderovací JavaScript inline — prečíta dátový objekt a za behu poskladá celú stránku ako HTML reťazec.
 
-Cieľom je nulová prevádzková réžia: nie je tu package manager, build step, backend ani databáza. Úprava životopisu = úprava jedného objektu v `content.js` a refresh prehliadača. Hosting = nahratie troch súborov (`index.html`, `content.js`, `og-image.svg`) na akýkoľvek statický hosting.
+Cieľom je nulová prevádzková réžia: nie je tu package manager, build step, backend ani databáza. Úprava životopisu = úprava jedného objektu v `content.js` a refresh prehliadača. Hosting = nahratie šiestich súborov (`index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js`, `og-image.svg`) na akýkoľvek statický hosting.
 
 Stránka je od začiatku dvojjazyčná — každý text je pár `{ sk, en }` a prepnutie jazyka len znovu spustí `render()`, bez reloadu.
 
@@ -59,7 +59,9 @@ Stránka je od začiatku dvojjazyčná — každý text je pár `{ sk, en }` a p
 - 🎯 **Favicon z monogramu** — SVG data URI sa generuje z iniciál mena a nastavenej akcentovej farby, nahrádza fallback v `<head>`.
 - 🖼️ **Fallback avatara** — pri vyplnenom `meta.photo` sa vykreslí `<img>`, inak gradientový monogram z iniciál.
 - 📋 **Kopírovanie do schránky** — tlačidlo `zdieľať` skopíruje URL stránky, e-mail v pätičke skopíruje adresu; obe s toast potvrdením a fallbackom (toast s URL, resp. `mailto:`).
-- 🧭 **Scroll UX** — horný progress bar, jump-nav so scroll-spy cez `IntersectionObserver` a plávajúce tlačidlo späť hore.
+- 🧭 **Scroll UX** — jump-nav so scroll-spy cez `IntersectionObserver` a plávajúce tlačidlo späť hore.
+- ✨ **Odhaľovanie pri scrollovaní** — sekcia sa neobjaví naraz: roztiahne sa jej horná linka, zľava pricestuje číslo sekcie, dokreslí sa zvislá čiara časovej osi a položky prilietajú jedna po druhej (poradie drží CSS premenná `--i`, ktorú priradí `observeReveals()`).
+- 🗃️ **Podstránka so všetkými projektami** — `projekty.html` vypisuje všetky verejné GitHub projekty, roztriedené do kategórií, s filtrom, ktorý si voľbu pamätá v `sessionStorage`, a vlastným JSON-LD blokom `CollectionPage`.
 - 🖨️ **Tlač do PDF priamo zo stránky** — tlačidlo *Stiahnuť CV (PDF)* spustí `window.print()` a `@media print` stylesheet z webu spraví hotový dokument: stmavené akcenty čitateľné na bielom, zachovaný monogram, čísla sekcií, badge aj karty, stiahnuté rozostupy, `break-inside: avoid` proti trhaniu cez zlom strany, adresy externých odkazov vypísané v texte a **rozbalené všetky skryté certifikáty**.
 - ♿ **Prístupnosť** — skip-to-content odkaz, `role="status" aria-live="polite"` toast, `aria-label` na prepínači jazyka aj navigácii, viditeľné `:focus-visible` outliny a plný blok `prefers-reduced-motion`.
 - 🛟 **Odolnosť voči chybám** — viditeľný boot stav `Načítavam CV… / Loading…`, `<noscript>` hláška, try/catch okolo štartu, ktorý chybu vypíše priamo na stránku namiesto čiernej obrazovky, fallback keď `IntersectionObserver` chýba, a poistka po 1,4 s, ktorá pridá `body.force` a natvrdo zobrazí čokoľvek zaseknuté na `opacity: 0`.
@@ -98,9 +100,11 @@ npx serve .
 
 ```text
 Apoliak-CV-online/
-├── index.html      # celá aplikácia: <head> s SEO placeholdermi, inline <style>
-│                   # (~420 riadkov design systému) a inline <script> (~540 riadkov renderera)
-├── content.js      # JEDINÝ súbor, ktorý meníš pri úprave obsahu — window.CV_DATA
+├── index.html      # životopis: <head> s SEO placeholdermi + inline <script> renderera
+├── projekty.html   # podstránka so všetkými verejnými GitHub projektami
+├── style.css       # dizajnový systém — zdieľajú ho obe stránky
+├── content.js      # obsah životopisu — window.CV_DATA
+├── projects.js     # obsah podstránky projektov — window.PROJECTS_DATA
 ├── og-image.svg    # ručne písaná 1200x630 náhľadová karta pre zdieľanie odkazu
 ├── README.md       # tento súbor (stránka ho nenačítava, na hosting ho netreba)
 └── README.en.md    # anglický preklad tohto súboru
@@ -147,6 +151,7 @@ Celá konfigurácia je v bloku `meta` v `content.js`. Žiadne premenné prostred
 | `hero.available`                  | `true`             | zapína pulzujúcu bodku dostupnosti vo farbe `meta.accent`                                                                                                                           |
 | `sections.order`                  | pole 6 kľúčov      | poradie sekcií na stránke                                                                                                                                                           |
 | `sections.<key>.show`             | `true`             | vypnutie sekcie bez mazania dát                                                                                                                                                     |
+| `sections.<key>.more`             | len pri projektoch | `{ url, count, label }` — vykreslí pod sekciou tlačidlo na podstránku. `count` zároveň prepíše číslo v počítadle (na hlavnej je len výber projektov, počítadlo hlási skutočný počet) |
 
 > [!NOTE]
 > Hlavná ladiaca konštanta mimo `content.js` je `CERT_PREVIEW = 5` v inline skripte `index.html` — koľko certifikátov na vydavateľa sa zobrazí pred tlačidlom *Zobraziť ďalších N*. Okrem nej sú v `index.html` natvrdo aj fallback favicon (monogram „AP" a farba `#d6ff4b`), statický `<title>Portfólio</title>`, `theme-color` (statická hodnota v `<head>`, ktorú `render()` prepíše vypočítaným pozadím `body`), `og:locale` (`sk_SK`), rozmery OG obrázka, krajina `SK` v JSON-LD adrese a celá `:root` fallback paleta, ktorej `--accent` / `--accent-2` / `--accent-3` duplikujú hodnoty z `content.js`.
@@ -196,7 +201,7 @@ O výsledný vzhľad sa stará `@media print` stylesheet. Nerobí z dokumentu ho
 - akcenty sa stmavia (`#4f6b00`, `#a8500a`, `#14618f`), aby boli na bielom čitateľné, ale monogram, čísla sekcií, badge, karty aj časová os ostávajú;
 - rozostupy sa stiahnu, `@page` má okraje 14 × 13 mm a `print-color-adjust: exact` zaručí, že prehliadač farby nezahodí;
 - `break-inside: avoid` drží pohromade jednotlivé záznamy, aby sa nerozpadli cez zlom strany;
-- skryjú sa ovládacie prvky (prepínač jazyka, jump-nav, progress bar, tlačidlá) a **rozbalia sa všetky skryté certifikáty**;
+- skryjú sa ovládacie prvky (prepínač jazyka, jump-nav, tlačidlá) a **rozbalia sa všetky skryté certifikáty**;
 - za externými odkazmi sa v texte vypíše ich adresa — na papieri je inak stratená.
 
 > [!IMPORTANT]
@@ -206,7 +211,7 @@ O výsledný vzhľad sa stará `@media print` stylesheet. Nerobí z dokumentu ho
 
 ## 🌐 Nasadenie
 
-Nahraj tri súbory — `index.html`, `content.js` a `og-image.svg` — tak, ako sú, na akýkoľvek statický hosting: GitHub Pages, Netlify, Vercel, obyčajný nginx alebo Apache. `README.md` a `README.en.md` môžeš nahrať tiež, stránka ich nepoužíva. Žiadne PHP, žiadna databáza, žiadne prostredie.
+Nahraj všetkých šesť súborov — `index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js` a `og-image.svg` — tak, ako sú, na akýkoľvek statický hosting: GitHub Pages, Netlify, Vercel, obyčajný nginx alebo Apache. `README.md` a `README.en.md` môžeš nahrať tiež, stránka ich nepoužíva. Žiadne PHP, žiadna databáza, žiadne prostredie.
 
 Pred nasadením:
 
