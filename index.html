@@ -26,15 +26,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- fonty načítavame NEblokujúco (media="print" → po načítaní sa prepne na all):
        stránka sa vykreslí okamžite so systémovým fontom aj bez internetu / pri pomalej sieti -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"></noscript>
 
+  <!-- svetlý / tmavý režim ešte pred prvým vykreslením (uložená voľba, inak podľa systému) -->
+  <script>
+    (function () {
+      var th = 'light';
+      try {
+        th = localStorage.getItem('cv_theme');
+        if (th !== 'light' && th !== 'dark') th = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      } catch (e) { th = 'light'; }
+      document.documentElement.setAttribute('data-theme', th);
+    })();
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <a class="skip" href="#app">Preskočiť na obsah / Skip to content</a>
-  <!-- živé pozadie: tri rozmazané farebné škvrny, ktoré pomaly driftujú (CSS .aurora) -->
-  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <!-- prehliadač certifikátov: obsah dopĺňa lbShow() -->
@@ -56,9 +65,15 @@
 
   <button type="button" class="fab-top" id="fab-top" aria-label="Späť hore / Back to top" title="Späť hore / Back to top">&#8593;</button>
 
-  <div class="lang" role="group" aria-label="Jazyk / Language">
-    <button id="btn-sk" class="active" onclick="setLang('sk')">SK</button>
-    <button id="btn-en" onclick="setLang('en')">EN</button>
+  <div class="topbar">
+    <button type="button" class="theme-btn" id="btn-theme" onclick="toggleTheme()" aria-label="Svetlý / tmavý režim" title="Svetlý / tmavý režim">
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+    </button>
+    <div class="lang" role="group" aria-label="Jazyk / Language">
+      <button id="btn-sk" class="active" onclick="setLang('sk')">SK</button>
+      <button id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
   </div>
 
   <main class="wrap" id="app">
@@ -243,30 +258,31 @@
       var nameHtml;
       if (parts.length >= 2) {
         var mid = Math.ceil(parts.length / 2);
-        nameHtml = esc(parts.slice(0, mid).join(' ')) + '<br>' + esc(parts.slice(mid).join(' '));
+        nameHtml = esc(parts.slice(0, mid).join(' ')) + '<br><span class="hl">' + esc(parts.slice(mid).join(' ')) + '</span>';
       } else { nameHtml = name; }
 
       // favicon z monogramu
       updateFavicon(initials(m.name), (m.accent || '#d6ff4b'));
 
       var html = '';
-      html += '<header class="hero">';
-      html += '<div class="hero-top">';
+      // ---- ľavý panel: identita, kontakty, čísla, navigácia (na mobile hlavička nad obsahom)
+      html += '<div class="layout"><aside class="side"><div class="side-inner">';
+      html += '<div class="id-row rise d1">';
       if (m.photo) {
-        html += '<img class="avatar rise d1" src="' + esc(safeUrl(m.photo)) + '" alt="' + name + '">';
+        html += '<img class="avatar" src="' + esc(safeUrl(m.photo)) + '" alt="' + name + '">';
       } else {
-        html += '<div class="monogram rise d1" aria-hidden="true">' + esc(initials(m.name)) + '</div>';
+        html += '<div class="monogram" aria-hidden="true">' + esc(initials(m.name)) + '</div>';
       }
-      html += '<div class="status rise d1"><span class="dot ' + (h.available ? 'on' : '') + '"></span>'
-            + '<span class="mono">&gt; ' + esc(t(h.status, lang)) + '</span></div>';
-      if (t(m.location, lang)) html += '<span class="status rise d1" style="color:var(--text-dim)"><span class="mono">' + esc(t(m.location, lang)) + '</span></span>';
-      if (t(m.birth, lang)) html += '<span class="status rise d1" style="color:var(--text-dim)"><span class="mono">'
-            + (lang === 'sk' ? 'nar. ' : 'b. ') + esc(t(m.birth, lang)) + '</span></span>';
+      if (t(h.status, lang)) html += '<div class="status"><span class="dot ' + (h.available ? 'on' : '') + '"></span>'
+            + '<span>' + esc(t(h.status, lang)) + '</span></div>';
       html += '</div>';
 
-      html += '<h1 class="rise d2">' + nameHtml + '<span class="accent">.</span></h1>';
-      if (t(h.role, lang)) html += '<div class="role rise d3">// ' + esc(t(h.role, lang)) + '</div>';
-      if (t(h.bio, lang))  html += '<p class="bio rise d3">' + esc(t(h.bio, lang)) + '</p>';
+      html += '<h1 class="name rise d2">' + nameHtml + '<span class="accent">.</span></h1>';
+      if (t(h.role, lang)) html += '<div class="role rise d3">' + esc(t(h.role, lang)) + '</div>';
+      var facts = [];
+      if (t(m.location, lang)) facts.push('<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>' + esc(t(m.location, lang)) + '</span>');
+      if (t(m.birth, lang)) facts.push('<span>' + (lang === 'sk' ? 'nar. ' : 'b. ') + esc(t(m.birth, lang)) + '</span>');
+      if (facts.length) html += '<div class="facts rise d3">' + facts.join('') + '</div>';
 
       // odkazy
       var links = D.links || [];
@@ -275,8 +291,11 @@
         var label = esc(t(lk.label, lang));
         var url = safeUrl(lk.url);
         var ext = isExternal(url) ? ' target="_blank" rel="noopener"' : '';
-        var arrow = isExternal(url) ? ' &#8599;' : '';
-        html += '<a href="' + esc(url) + '"' + ext + '>' + label + arrow + '</a>';
+        // v paneli ukážeme priamo adresu / číslo, nie len slovo „e-mail"
+        var val = String(lk.url || '').replace(/^mailto:/i, '').replace(/^tel:/i, '').replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
+        if (/^tel:/i.test(String(lk.url || ''))) val = val.replace(/^(\+\d{3})(\d{3})(\d{3})(\d{3})$/, '$1 $2 $3 $4');
+        html += '<a href="' + esc(url) + '"' + ext + '><span class="lk"><span class="lk-label">' + label + '</span>'
+              + '<span class="lk-val">' + esc(val) + '</span></span></a>';
       });
       if (m.cvFile && !/tvoje-domena/.test(m.cvFile)) {
         html += '<a class="cv" href="' + esc(safeUrl(m.cvFile)) + '" target="_blank" rel="noopener">'
@@ -293,7 +312,17 @@
 
       html += renderJumpNav();
 
-      html += '</header>';
+      html += '</div></aside>';
+
+      // ---- pravý stĺpec: úvod (prvá veta bio veľkým písmom, zvyšok pod ňou) + sekcie
+      html += '<div class="main">';
+      if (t(h.bio, lang)) {
+        var bio = t(h.bio, lang), cut = bio.search(/[.!?]\s/);
+        var lead = cut > 0 ? bio.slice(0, cut + 1) : bio, rest = cut > 0 ? bio.slice(cut + 2) : '';
+        html += '<header class="intro rise d2"><div class="kicker">' + (lang === 'sk' ? 'O mne' : 'About me') + '</div>'
+              + '<p class="bio">' + esc(lead) + '</p>'
+              + (rest ? '<p class="bio-rest">' + esc(rest) + '</p>' : '') + '</header>';
+      }
 
       // sekcie podľa poradia
       var sec = D.sections || {};
@@ -327,6 +356,7 @@
       if (f.email) html += '<a href="mailto:' + esc(f.email) + '" class="copy-email" data-email="' + esc(f.email) + '">' + esc(f.email) + '</a>';
       html += '<button class="to-top" onclick="window.scrollTo({top:0,behavior:\'smooth\'})">' + (lang === 'sk' ? 'hore' : 'top') + ' &#8593;</button>';
       html += '</span></footer>';
+      html += '</div></div>';   // .main + .layout
 
       document.getElementById('app').innerHTML = html;
 
@@ -764,6 +794,16 @@
           }
         };
       });
+    }
+
+    // svetlý / tmavý režim — voľba sa pamätá (localStorage), predvolený je podľa systému
+    function toggleTheme() {
+      var root = document.documentElement;
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('cv_theme', next); } catch (e) {}
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', next === 'dark' ? '#0e0e0c' : '#f3f0e8');
     }
 
     function setLang(l) {
