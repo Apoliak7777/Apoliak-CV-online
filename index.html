@@ -38,6 +38,10 @@
         if (th !== 'light' && th !== 'dark') th = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       } catch (e) { th = 'light'; }
       document.documentElement.setAttribute('data-theme', th);
+      // prechod medzi stránkami (View Transition) prehliadač niekedy preskočí — nie je to chyba, len ticho
+      function quiet(e) { var v = e.viewTransition; if (v) { v.ready.catch(function () {}); v.finished.catch(function () {}); } }
+      window.addEventListener('pageswap', quiet);
+      window.addEventListener('pagereveal', quiet);
     })();
   </script>
   <link rel="stylesheet" href="style.css">
@@ -128,6 +132,41 @@
     function plCert(n, l) {
       if (l === 'sk') return n === 1 ? 'certifikát' : (n >= 2 && n <= 4 ? 'certifikáty' : 'certifikátov');
       return n === 1 ? 'certificate' : 'certificates';
+    }
+    // text rozdelený na slová — pri odhalení každé slovo vyjde zospodu (CSS .split .w)
+    function splitWords(str) {
+      return String(str).split(/\s+/).filter(Boolean).map(function (w, i) {
+        return '<span class="w"><span style="--wi:' + i + '">' + esc(w) + '</span></span>';
+      }).join(' ');
+    }
+    // náhľad projektu, ktorý nemá živý web — tmavé okno s cestou k repozitáru
+    function codeShot(owner, repo) {
+      return '<span class="project-shot is-code" aria-hidden="true"><span class="shot-bar"><i></i><i></i><i></i></span>'
+           + '<span class="shot-img"><span class="code-c">// ' + (lang === 'sk' ? 'zdrojový kód' : 'source code') + '</span>'
+           + '<span class="code-u">github.com/' + esc(owner) + '/</span>'
+           + '<span class="code-n">' + esc(repo) + '</span></span></span>';
+    }
+    // 3D naklonenie kartičiek za myšou — len pri myši (nie dotyk) a bez „obmedziť pohyb"
+    var canTilt = !!(window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches
+                  && !matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function bindTilt() {
+      if (!canTilt) return;
+      document.querySelectorAll('.cert-card, .project.has-shot').forEach(function (el) {
+        var max = el.classList.contains('cert-card') ? 7 : 3;
+        el.onpointermove = function (e) {
+          var r = el.getBoundingClientRect();
+          var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+          el.style.setProperty('--ry', ((x - 0.5) * 2 * max).toFixed(2) + 'deg');
+          el.style.setProperty('--rx', ((0.5 - y) * 2 * max).toFixed(2) + 'deg');
+          el.style.setProperty('--gx', (x * 100).toFixed(1) + '%');
+          el.style.setProperty('--gy', (y * 100).toFixed(1) + '%');
+          el.classList.add('is-tilt');
+        };
+        el.onpointerleave = function () {
+          el.classList.remove('is-tilt');
+          el.style.removeProperty('--rx'); el.style.removeProperty('--ry');
+        };
+      });
     }
     // náhľad certifikátu: certifikaty/x.jpg → certifikaty/nahlady/x.webp (ak nie je zadaný ručne cez "thumb")
     function certThumb(c) {
@@ -320,7 +359,7 @@
         var bio = t(h.bio, lang), cut = bio.search(/[.!?]\s/);
         var lead = cut > 0 ? bio.slice(0, cut + 1) : bio, rest = cut > 0 ? bio.slice(cut + 2) : '';
         html += '<header class="intro rise d2"><div class="kicker">' + (lang === 'sk' ? 'O mne' : 'About me') + '</div>'
-              + '<p class="bio">' + esc(lead) + '</p>'
+              + '<p class="bio split">' + splitWords(lead) + '</p>'
               + (rest ? '<p class="bio-rest">' + esc(rest) + '</p>' : '') + '</header>';
       }
 
@@ -336,7 +375,7 @@
         num++;
         var n = (num < 10 ? '0' : '') + num;
         html += '<section class="reveal" id="section-' + esc(key) + '"><div class="sec-head"><span class="sec-num">' + n + '</span>'
-              + '<span class="sec-title">' + esc(t(cfg.label, lang)) + '</span>'
+              + '<span class="sec-title split">' + splitWords(t(cfg.label, lang)) + '</span>'
               + '<span class="sec-count">' + items.length + '</span></div>';
         html += renderSection(key, items);
         // voliteľný odkaz pod sekciou (napr. "Pozrieť všetky projekty")
@@ -436,12 +475,24 @@
           var href = url ? ' href="' + esc(url) + '"' + ext : '';
           var feat = p.featured ? ' featured' : '';
           var badge = p.featured ? '<span class="project-badge">' + (lang === 'sk' ? 'Hlavný' : 'Featured') + '</span>' : '';
-          s += '<' + tag + ' class="project' + feat + '"' + href + '>'
-             + '<div class="project-head"><span class="project-title">' + esc(t(p.title, lang)) + '</span>'
-             + ((badge || url) ? '<span class="project-head-right">' + badge + (url ? '<span class="project-arrow">&#8599;</span>' : '') + '</span>' : '') + '</div>'
-             + '<p class="project-desc">' + esc(t(p.desc, lang)) + '</p>'
-             + (tags ? '<div class="project-tags">' + tags + '</div>' : '')
-             + '</' + tag + '>';
+          // náhľad živého webu v „okne prehliadača" (screenshot v projekty-nahlady/)
+          var shot = '';
+          if (p.img) {
+            shot = '<span class="project-shot" aria-hidden="true"><span class="shot-bar"><i></i><i></i><i></i></span>'
+               + '<span class="shot-img"><img src="' + esc(safeUrl(p.img)) + '" alt="" loading="lazy" decoding="async" width="960" height="600"></span></span>';
+          } else {
+            // projekt bez živého webu: „okno s kódom" s cestou k repozitáru na GitHube
+            var gh = /github\.com\/([^\/]+)\/([^\/?#]+)/i.exec(p.url || '');
+            if (gh) shot = codeShot(gh[1], gh[2]);
+          }
+          s += '<' + tag + ' class="project' + feat + (shot ? ' has-shot' : '') + '"' + href + '>'
+             + shot
+             + '<span class="project-body">'
+             + '<span class="project-head"><span class="project-title">' + esc(t(p.title, lang)) + '</span>'
+             + ((badge || url) ? '<span class="project-head-right">' + badge + (url ? '<span class="project-arrow">&#8599;</span>' : '') + '</span>' : '') + '</span>'
+             + '<span class="project-desc">' + esc(t(p.desc, lang)) + '</span>'
+             + (tags ? '<span class="project-tags">' + tags + '</span>' : '')
+             + '</span></' + tag + '>';
         });
         return s + '</div>';
       }
@@ -754,6 +805,7 @@
     }
 
     function bindInteractions() {
+      bindTilt();
       document.querySelectorAll('.cert-card').forEach(function (card) {
         card.onclick = function () { lbOpen(parseInt(card.getAttribute('data-lb'), 10) || 0); };
       });
@@ -796,14 +848,29 @@
       });
     }
 
-    // svetlý / tmavý režim — voľba sa pamätá (localStorage), predvolený je podľa systému
+    // svetlý / tmavý režim — voľba sa pamätá (localStorage), predvolený je podľa systému.
+    // Kde to prehliadač vie (View Transitions), nová farba sa rozleje kruhom z ikonky.
     function toggleTheme() {
       var root = document.documentElement;
       var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
-      try { localStorage.setItem('cv_theme', next); } catch (e) {}
-      var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute('content', next === 'dark' ? '#0e0e0c' : '#f3f0e8');
+      function apply() {
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('cv_theme', next); } catch (e) {}
+        var tc = document.querySelector('meta[name="theme-color"]');
+        if (tc) tc.setAttribute('content', next === 'dark' ? '#0e0e0c' : '#f3f0e8');
+      }
+      var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!document.startViewTransition || reduce) { apply(); return; }
+      var b = document.getElementById('btn-theme').getBoundingClientRect();
+      var x = b.left + b.width / 2, y = b.top + b.height / 2;
+      var rad = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+      root.classList.add('theme-vt');
+      var vt = document.startViewTransition(apply);
+      vt.ready.then(function () {
+        root.animate({ clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + rad + 'px at ' + x + 'px ' + y + 'px)'] },
+                     { duration: 700, easing: 'cubic-bezier(.22,.61,.36,1)', pseudoElement: '::view-transition-new(root)' });
+      }).catch(function () {});
+      vt.finished.then(function () { root.classList.remove('theme-vt'); }, function () { root.classList.remove('theme-vt'); });
     }
 
     function setLang(l) {

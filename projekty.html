@@ -35,6 +35,10 @@
         if (th !== 'light' && th !== 'dark') th = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       } catch (e) { th = 'light'; }
       document.documentElement.setAttribute('data-theme', th);
+      // prechod medzi stránkami (View Transition) prehliadač niekedy preskočí — nie je to chyba, len ticho
+      function quiet(e) { var v = e.viewTransition; if (v) { v.ready.catch(function () {}); v.finished.catch(function () {}); } }
+      window.addEventListener('pageswap', quiet);
+      window.addEventListener('pagereveal', quiet);
     })();
   </script>
   <link rel="stylesheet" href="style.css">
@@ -98,6 +102,13 @@
       if (el) el.setAttribute(attr || 'content', val || '');
     }
 
+    // text rozdelený na slová — pri odhalení každé slovo vyjde zospodu (CSS .split .w)
+    function splitWords(str) {
+      return String(str).split(/\s+/).filter(Boolean).map(function (w, i) {
+        return '<span class="w"><span style="--wi:' + i + '">' + esc(w) + '</span></span>';
+      }).join(' ');
+    }
+
     /* slovenské skloňovanie: 1 projekt, 2–4 projekty, 5+ projektov */
     function plProj(n, l) {
       if (l === 'sk') return n === 1 ? 'projekt' : (n >= 2 && n <= 4 ? 'projekty' : 'projektov');
@@ -108,7 +119,7 @@
       var m = P.meta || {};
       var base = getSiteUrl();
       var here = base ? base + '/projekty.html' : '';
-      var og = base ? base + '/og-image.svg' : '';
+      var og = base ? base + '/og-image.png' : '';
       var desc = t(m.description, lang);
       document.title = t(m.title, lang) || 'Projekty';
       setMeta('meta[name="description"]', desc);
@@ -173,7 +184,22 @@
       var meta = [];
       if (p.year) meta.push(String(p.year));
       if (p.lang) meta.push(esc(p.lang));
-      var s = '<article class="proj-card r-item' + (p.featured ? ' featured' : '') + '">';
+      var shotUrl = live || repo;
+      var shot = '';
+      if (p.img) {
+        shot = '<a class="project-shot proj-shot" href="' + esc(shotUrl) + '" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">'
+           + '<span class="shot-bar"><i></i><i></i><i></i></span>'
+           + '<span class="shot-img"><img src="' + esc(safeUrl(p.img)) + '" alt="" loading="lazy" decoding="async" width="960" height="600"></span></a>';
+      } else {
+        // projekt bez živého webu: „okno s kódom" s cestou k repozitáru na GitHube
+        var gh = /github\.com\/([^\/]+)\/([^\/?#]+)/i.exec(repo);
+        if (gh) shot = '<a class="project-shot proj-shot is-code" href="' + esc(repo) + '" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">'
+           + '<span class="shot-bar"><i></i><i></i><i></i></span>'
+           + '<span class="shot-img"><span class="code-c">// ' + (lang === 'sk' ? 'zdrojový kód' : 'source code') + '</span>'
+           + '<span class="code-u">github.com/' + esc(gh[1]) + '/</span>'
+           + '<span class="code-n">' + esc(gh[2]) + '</span></span></a>';
+      }
+      var s = '<article class="proj-card r-item' + (p.featured ? ' featured' : '') + (shot ? ' has-shot' : '') + '">' + shot;
       s += '<div class="proj-head"><span class="proj-name">' + esc(p.name) + '</span>'
          + (p.featured ? '<span class="proj-badge">' + (lang === 'sk' ? 'Hlavný' : 'Featured') + '</span>' : '')
          + '</div>';
@@ -197,7 +223,7 @@
 
       html += '<header class="page-head">';
       html += '<a class="back-link rise d1" href="index.html">&#8592; ' + esc(t(m.backLabel, lang)) + '</a>';
-      html += '<h1 class="rise d2">' + esc(t(m.heading, lang)) + '<span class="accent">.</span></h1>';
+      html += '<h1 class="rise d2 split">' + splitWords(t(m.heading, lang)) + '<span class="accent">.</span></h1>';
       html += '<p class="page-lead rise d3">' + esc(t(m.lead, lang)) + '</p>';
       html += renderFilters();
       html += '</header>';
@@ -214,7 +240,7 @@
           var n = (num < 10 ? '0' : '') + num;
           html += '<section class="reveal" id="section-' + esc(g.key) + '"><div class="sec-head">'
                 + '<span class="sec-num">' + n + '</span>'
-                + '<span class="sec-title">' + esc(t(g.label, lang)) + '</span>'
+                + '<span class="sec-title split">' + splitWords(t(g.label, lang)) + '</span>'
                 + '<span class="sec-count">' + items.length + '</span></div>';
           html += '<div class="proj-grid">' + items.map(renderCard).join('') + '</div></section>';
         });
@@ -222,7 +248,7 @@
         var g = groups.filter(function (x) { return x.key === filter; })[0];
         html += '<section class="reveal" id="section-' + esc(filter) + '"><div class="sec-head">'
               + '<span class="sec-num">01</span>'
-              + '<span class="sec-title">' + esc(g ? t(g.label, lang) : '') + '</span>'
+              + '<span class="sec-title split">' + splitWords(g ? t(g.label, lang) : '') + '</span>'
               + '<span class="sec-count">' + list.length + '</span></div>';
         html += '<div class="proj-grid">' + list.map(renderCard).join('') + '</div></section>';
       }
@@ -284,10 +310,24 @@
     function toggleTheme() {
       var root = document.documentElement;
       var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
-      try { localStorage.setItem('cv_theme', next); } catch (e) {}
-      var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute('content', next === 'dark' ? '#0e0e0c' : '#f3f0e8');
+      function apply() {
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('cv_theme', next); } catch (e) {}
+        var tc = document.querySelector('meta[name="theme-color"]');
+        if (tc) tc.setAttribute('content', next === 'dark' ? '#0e0e0c' : '#f3f0e8');
+      }
+      var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!document.startViewTransition || reduce) { apply(); return; }
+      var b = document.getElementById('btn-theme').getBoundingClientRect();
+      var x = b.left + b.width / 2, y = b.top + b.height / 2;
+      var rad = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+      root.classList.add('theme-vt');
+      var vt = document.startViewTransition(apply);
+      vt.ready.then(function () {
+        root.animate({ clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + rad + 'px at ' + x + 'px ' + y + 'px)'] },
+                     { duration: 700, easing: 'cubic-bezier(.22,.61,.36,1)', pseudoElement: '::view-transition-new(root)' });
+      }).catch(function () {});
+      vt.finished.then(function () { root.classList.remove('theme-vt'); }, function () { root.classList.remove('theme-vt'); });
     }
 
     function setLang(l) {

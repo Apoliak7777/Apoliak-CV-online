@@ -14,7 +14,7 @@ window.CV_DATA = {
     photo: "",            // vlož URL fotky; ak je prázdne, zobrazí sa monogram "AP"
     cvFile: "",           // odkaz na hotové PDF; ak je prázdne, tlačidlo "Stiahnuť CV (PDF)" vytlačí túto stránku
     siteUrl: "https://apoliak7777.github.io/Apoliak-CV-online/",  // plná URL stránky — pre OG náhľad a SEO
-    ogImage: "og-image.svg",
+    ogImage: "og-image.png",      // náhľad pri zdieľaní odkazu (PNG — WhatsApp, Messenger ani LinkedIn nevedia SVG)
     location: { sk: "Nová Dedinka, Slovensko", en: "Nová Dedinka, Slovakia" },
     locality: "Nová Dedinka",     // obec pre JSON-LD (schema.org PostalAddress)
     birth: { sk: "25. 8. 2008", en: "25 Aug 2008" },
@@ -83,12 +83,14 @@ window.CV_DATA = {
       title: { sk: "wireadvise.net — firemný web (USA)", en: "wireadvise.net — Business Website (USA)" },
       desc: { sk: "Kompletný vývoj a nasadenie responzívnej webovej stránky pre americkú spoločnosť wireadvise. Frontend, optimalizácia rýchlosti, technická údržba a priebežné aktualizácie.", en: "Full development and deployment of a responsive website for US company wireadvise. Frontend, performance optimization, technical maintenance and ongoing updates." },
       url: "https://www.wireadvise.net/",
+      img: "projekty-nahlady/wireadvise.webp",
       tags: ["HTML", "CSS", "Responsive", "Client Project", "Live"]
     },
     {
       title: { sk: "Toto portfólio (cvonline)", en: "This Portfolio (cvonline)" },
-      desc: { sk: "Statické dvojjazyčné CV/portfólio bez frameworku — obsah v jednom súbore, tmavý dizajn, SEO, tlač do PDF a pripravené na bezplatný hosting.", en: "Static bilingual CV/portfolio without a framework — content in a single file, dark design, SEO, print-to-PDF and ready for free hosting." },
+      desc: { sk: "Statické dvojjazyčné CV/portfólio bez frameworku — obsah v jednom súbore, svetlý aj tmavý režim, SEO, tlač do PDF a pripravené na bezplatný hosting.", en: "Static bilingual CV/portfolio without a framework — content in a single file, light and dark mode, SEO, print-to-PDF and ready for free hosting." },
       url: "https://github.com/Apoliak7777/Apoliak-CV-online",
+      img: "projekty-nahlady/cv-online.webp",
       tags: ["HTML", "CSS", "JavaScript", "Open Source"]
     },
     {
@@ -96,6 +98,7 @@ window.CV_DATA = {
       title: { sk: "apoliak.online — môj freelance web", en: "apoliak.online — My Freelance Site" },
       desc: { sk: "Web mojej služby tvorby stránok pre malé podniky, aj s galériou dvadsiatich preklikateľných ukážkových webov. Čisté HTML, CSS a vanilla JavaScript na vlastnej doméne.", en: "The site for my web-building service for small businesses, including a gallery of twenty clickable demo sites. Plain HTML, CSS and vanilla JavaScript on my own domain." },
       url: "https://apoliak.online/",
+      img: "projekty-nahlady/apoliak-online.webp",
       tags: ["HTML", "CSS", "JavaScript", "20 ukážok", "Vlastná doména"]
     },
     {
@@ -108,12 +111,14 @@ window.CV_DATA = {
       title: { sk: "ConsoleDex — databáza herných konzol", en: "ConsoleDex — Game Console Database" },
       desc: { sk: "Katalóg všetkých herných konzol, čo kedy vyšli — 70 konzol od 24 výrobcov od roku 1972. Filtrovanie, porovnávanie a dvojjazyčné rozhranie bez servera.", en: "A catalogue of every game console ever made — 70 consoles from 24 makers since 1972. Filtering, comparison and a bilingual interface with no server." },
       url: "https://apoliak7777.github.io/ConsoleDex/",
+      img: "projekty-nahlady/consoledex.webp",
       tags: ["JavaScript", "Dvojjazyčné", "70 konzol", "Live"]
     },
     {
       title: { sk: "Odrátané hodiny — evidencia šichiet", en: "Odrátané hodiny — Shift Tracker" },
       desc: { sk: "Appka na zapisovanie odpracovaných šichiet a kontrolu výplaty. Dopočíta príplatky, pozná sviatky, rozumie rýchlemu zápisu textom a funguje úplne offline.", en: "An app for logging worked shifts and checking your payslip. It calculates weekend rates, knows public holidays, understands quick text entry and works fully offline." },
       url: "https://apoliak7777.github.io/odratane-hodiny/",
+      img: "projekty-nahlady/odratane-hodiny.webp",
       tags: ["Vanilla JS", "Offline-first", "PWA", "Live"]
     },
     {
@@ -124,8 +129,9 @@ window.CV_DATA = {
     },
     {
       title: { sk: "Toto portfólio (cvonline)", en: "This Portfolio (cvonline)" },
-      desc: { sk: "Statické dvojjazyčné CV/portfólio bez frameworku — obsah v jednom súbore, tmavý dizajn, SEO, tlač do PDF a pripravené na bezplatný hosting.", en: "Static bilingual CV/portfolio without a framework — content in a single file, dark design, SEO, print-to-PDF and ready for free hosting." },
+      desc: { sk: "Statické dvojjazyčné CV/portfólio bez frameworku — obsah v jednom súbore, svetlý aj tmavý režim, SEO, tlač do PDF a pripravené na bezplatný hosting.", en: "Static bilingual CV/portfolio without a framework — content in a single file, light and dark mode, SEO, print-to-PDF and ready for free hosting." },
       url: "https://github.com/Apoliak7777/Apoliak-CV-online",
+      img: "projekty-nahlady/cv-online.webp",
       tags: ["HTML", "CSS", "JavaScript", "Open Source"]
     },
     {

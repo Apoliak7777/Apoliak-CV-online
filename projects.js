@@ -47,6 +47,7 @@ window.PROJECTS_DATA = {
       name: "Apoliak — hlavný web",
       repo: "https://github.com/Apoliak7777/Apoliak-MAIN_WEB",
       live: "https://apoliak.online/",
+      img: "projekty-nahlady/apoliak-online.webp",
       group: "web", year: 2026, lang: "HTML", featured: true,
       short: {
         sk: "Môj freelance web na tvorbu stránok pre malé podniky, s galériou dvadsiatich preklikateľných ukážok.",
@@ -62,6 +63,7 @@ window.PROJECTS_DATA = {
       name: "ConsoleDex",
       repo: "https://github.com/Apoliak7777/ConsoleDex",
       live: "https://apoliak7777.github.io/ConsoleDex/",
+      img: "projekty-nahlady/consoledex.webp",
       group: "web", year: 2026, lang: "JavaScript", featured: true,
       short: {
         sk: "Databáza všetkých herných konzol, čo kedy vyšli — 70 konzol od 24 výrobcov, roky 1972 až 2026.",
@@ -77,6 +79,7 @@ window.PROJECTS_DATA = {
       name: "Odrátané hodiny",
       repo: "https://github.com/Apoliak7777/odratane-hodiny",
       live: "https://apoliak7777.github.io/odratane-hodiny/",
+      img: "projekty-nahlady/odratane-hodiny.webp",
       group: "web", year: 2026, lang: "HTML", featured: true,
       short: {
         sk: "Appka na evidenciu odpracovaných šichiet a kontrolu výplaty. Jedna stránka, funguje offline.",
@@ -92,6 +95,7 @@ window.PROJECTS_DATA = {
       name: "Apoliak CV online",
       repo: "https://github.com/Apoliak7777/Apoliak-CV-online",
       live: "https://apoliak7777.github.io/Apoliak-CV-online/",
+      img: "projekty-nahlady/cv-online.webp",
       group: "web", year: 2026, lang: "HTML",
       short: {
         sk: "Toto portfólio — dvojjazyčné online CV, ktoré si viem vytlačiť do PDF v rovnakom dizajne.",
@@ -107,6 +111,7 @@ window.PROJECTS_DATA = {
       name: "Git Portfolio",
       repo: "https://github.com/Apoliak7777/git-portfolio",
       live: "https://apoliak7777.github.io/git-portfolio/",
+      img: "projekty-nahlady/git-portfolio.webp",
       group: "web", year: 2026, lang: "HTML",
       short: {
         sk: "Vývojárske portfólio v tmavom glassmorphism dizajne.",
@@ -122,6 +127,7 @@ window.PROJECTS_DATA = {
       name: "aivisible",
       repo: "https://github.com/Apoliak7777/aivisible-web",
       live: "https://apoliak7777.github.io/aivisible-web/",
+      img: "projekty-nahlady/aivisible.webp",
       group: "web", year: 2026, lang: "HTML",
       short: {
         sk: "Šesťstránkový marketingový web pre službu AI viditeľnosti, bez frameworku a bez buildu.",
@@ -137,6 +143,7 @@ window.PROJECTS_DATA = {
       name: "AI učenie",
       repo: "https://github.com/Apoliak7777/ai-ucenie",
       live: "https://apoliak7777.github.io/ai-ucenie/",
+      img: "projekty-nahlady/ai-ucenie.webp",
       group: "web", year: 2026, lang: "HTML",
       short: {
         sk: "Rezervačná stránka na súkromné online hodiny práce s AI.",
@@ -152,6 +159,7 @@ window.PROJECTS_DATA = {
       name: "Minecraft Hosting",
       repo: "https://github.com/Apoliak7777/Hosting_Website",
       live: "https://apoliak7777.github.io/Hosting_Website/",
+      img: "projekty-nahlady/minecraft-hosting.webp",
       group: "web", year: 2026, lang: "JavaScript",
       short: {
         sk: "Web pre hosting Minecraft serverov, postavený v Reacte a Vite.",
@@ -167,6 +175,7 @@ window.PROJECTS_DATA = {
       name: "IP info",
       repo: "https://github.com/Apoliak7777/apoliakipinfo",
       live: "https://ipinfo.apoliak.online/",
+      img: "projekty-nahlady/ipinfo.webp",
       group: "web", year: 2026, lang: "HTML",
       short: {
         sk: "Zistí tvoju verejnú IP adresu a vyhľadá údaje k akejkoľvek IPv4 alebo doméne.",
@@ -182,6 +191,7 @@ window.PROJECTS_DATA = {
       name: "Maintenance stránka",
       repo: "https://github.com/Apoliak7777/maintenance-website",
       live: "https://apoliak7777.github.io/maintenance-website/",
+      img: "projekty-nahlady/maintenance.webp",
       group: "web", year: 2026, lang: "HTML",
       short: {
         sk: "Odstávková stránka, ktorá sa hodí na web počas údržby.",
@@ -329,6 +339,7 @@ window.PROJECTS_DATA = {
       name: "Vianočný odpočet",
       repo: "https://github.com/Apoliak7777/Christmas-timer",
       live: "https://apoliak7777.github.io/Christmas-timer/",
+      img: "projekty-nahlady/christmas-timer.webp",
       group: "fun", year: 2026, lang: "CSS",
       short: {
         sk: "Odpočítavanie do Vianoc s vlastnou animovanou atmosférou.",
