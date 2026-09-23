@@ -675,6 +675,123 @@ body::after {
 .cert-chip { box-shadow: inset 2px 0 0 color-mix(in srgb, var(--cg, var(--accent)) 50%, transparent); transition: border-color .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease); }
 .cert-chip:hover { box-shadow: inset 2px 0 0 var(--cg, var(--accent)); }
 
+/* --- certifikáty s obrázkom: galéria kartičiek + prehliadač (lightbox) ---
+       Kartička = náhľad certifikátu (biely papier na tmavom webe) + názov.
+       Klik otvorí #lb: obrázok vo veľkom, listovanie naprieč všetkými. --- */
+.cert-chips.cert-gallery { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+/* certifikáty tej istej skupiny, ku ktorým nie je obrázok — štítky pod galériou */
+.cert-chips.cert-chips-rest { margin-top: 12px; }
+.cert-card {
+  appearance: none; font: inherit; color: inherit; text-align: left; cursor: zoom-in;
+  display: flex; flex-direction: column; padding: 0; overflow: hidden;
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--cg, var(--accent)) 50%, transparent);
+  transition: border-color .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.cert-card.is-hidden { display: none; }
+.cert-group.is-expanded .cert-card.is-hidden { display: flex; }
+.cert-card:hover {
+  border-color: color-mix(in srgb, var(--cg, var(--accent)) 55%, var(--line)); transform: translateY(-3px);
+  box-shadow: inset 0 2px 0 var(--cg, var(--accent)), 0 22px 44px -28px rgba(0,0,0,.95),
+              0 14px 34px -26px color-mix(in srgb, var(--cg, var(--accent)) 70%, transparent);
+}
+.cert-card:focus-visible { outline: 2px solid var(--cg, var(--accent)); outline-offset: 3px; }
+/* pomer strán certifikátu na šírku (list Letter/A4) — celá mriežka má rovnaké výšky */
+.cert-thumb {
+  display: block; position: relative; aspect-ratio: 11 / 8.5; overflow: hidden;
+  background: #e9eaec; border-bottom: 1px solid var(--line);
+}
+.cert-thumb img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block;
+  transition: transform .45s var(--ease), filter .3s var(--ease);
+  filter: saturate(.92) brightness(.97);
+}
+.cert-card:hover .cert-thumb img { transform: scale(1.035); filter: none; }
+/* lupa v rohu náhľadu — naznačí, že sa dá otvoriť vo veľkom */
+.cert-thumb::after {
+  content: "922"; position: absolute; right: 8px; bottom: 8px;
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 14px; color: #fff; background: rgba(10,11,13,.66);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  opacity: 0; transform: translateY(4px); transition: opacity .2s var(--ease), transform .2s var(--ease);
+}
+.cert-card:hover .cert-thumb::after, .cert-card:focus-visible .cert-thumb::after { opacity: 1; transform: none; }
+.cert-card-body { display: flex; align-items: flex-start; gap: 9px; padding: 11px 13px 13px; }
+.cert-card:hover .cert-name { color: var(--cg, var(--accent)); }
+.cert-card .cert-name { transition: color .18s var(--ease); }
+
+html.lb-lock, html.lb-lock body { overflow: hidden; }
+.lb {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(6,7,9,.9);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  opacity: 0; transition: opacity .22s var(--ease);
+}
+.lb[hidden] { display: none; }
+.lb.open { opacity: 1; }
+.lb-stage {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  padding: 64px 84px 28px;
+}
+.lb-fig { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 16px; max-width: 100%; max-height: 100%; }
+.lb-img {
+  display: block; max-width: min(1180px, 100%);
+  max-height: calc(100vh - 200px); max-height: calc(100dvh - 200px);
+  width: auto; height: auto; object-fit: contain;
+  border-radius: 10px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 40px 90px -30px rgba(0,0,0,.95);
+  transform: scale(.985); transition: transform .25s var(--ease), opacity .2s var(--ease);
+}
+.lb.open .lb-img { transform: none; }
+.lb-img.is-loading { opacity: .35; }
+.lb-cap { display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; max-width: 720px; }
+.lb-title { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
+.lb-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-mid); }
+.lb-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+.lb-count { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); }
+.lb-verify {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; text-decoration: none;
+  color: var(--accent); padding: 5px 12px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  transition: background .18s var(--ease);
+}
+.lb-verify:hover { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.lb-btn {
+  position: absolute; z-index: 2; width: 46px; height: 46px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  padding: 0; color: var(--text);
+  background: rgba(22,24,30,.82); border: 1px solid var(--line-2);
+  transition: border-color .18s var(--ease), color .18s var(--ease), background .18s var(--ease);
+}
+.lb-btn[hidden] { display: none; }
+.lb-btn:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 50%, var(--line-2)); background: rgba(29,32,41,.95); }
+.lb-btn:focus-visible, .lb-verify:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lb-btn svg { display: block; }
+.lb-close { top: 16px; right: 16px; }
+.lb-close svg { width: 18px; height: 18px; }
+.lb-prev { left: 18px; top: 50%; transform: translateY(-50%); }
+.lb-next { right: 18px; top: 50%; transform: translateY(-50%); }
+
+@media (max-width: 640px) {
+  .cert-chips.cert-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .cert-card-body { padding: 9px 10px 11px; gap: 7px; }
+  .cert-card .cert-name { font-size: 13px; }
+  .cert-thumb::after { display: none; }
+  .lb-stage { padding: 62px 12px 92px; }
+  .lb-img { max-height: calc(100vh - 250px); max-height: calc(100dvh - 250px); border-radius: 8px; }
+  .lb-title { font-size: 16px; }
+  /* na mobile šípky dole po stranách popisu, nie cez obrázok */
+  .lb-prev, .lb-next { top: auto; bottom: 18px; transform: none; }
+  .lb-prev { left: 14px; } .lb-next { right: 14px; }
+  .lb-close { top: 12px; right: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cert-card, .cert-thumb img, .lb, .lb-img { transition: none !important; }
+  .cert-card:hover, .cert-card:hover .cert-thumb img { transform: none; }
+}
+
 /* --- karta projektu na hlavnej: hover má aj farebnú žiaru --- */
 .project:hover { box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 26px 50px -30px rgba(0,0,0,.9), 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), 0 18px 40px -24px var(--glow); }
 
@@ -725,7 +842,7 @@ footer::before {
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   body::before, body::after, .aurora, .lang, .to-top, .fab-top, .jump-nav, .toast,
-  .cert-more, .print-cv, .skip { display: none !important; }
+  .cert-more, .print-cv, .skip, .lb, .cert-thumb { display: none !important; }
   .monogram::before, .monogram::after,
   .stat::before, .stat::after, .interest::before, .interest::after,
   .proj-card::before, .proj-card::after, footer::before { display: none !important; }
@@ -734,7 +851,10 @@ footer::before {
   footer { border-top: 1px solid var(--line) !important; }
   .stat-num, .page-head h1 { -webkit-text-fill-color: var(--text) !important; color: var(--text) !important; }
   .hero h1 .accent, .page-head h1 .accent { text-shadow: none !important; }
-  .cert-chip.is-hidden { display: flex !important; }
+  .cert-chip.is-hidden, .cert-card.is-hidden { display: flex !important; }
+  .cert-chips.cert-gallery { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 9px; }
+  .cert-card { border-radius: var(--radius-xs); transform: none !important; box-shadow: none !important; background: #fff !important; }
+  .cert-card-body { padding: 8px 12px; }
   .wrap { max-width: 100%; }
   .reveal, .rise, .r-item, .sec-num { opacity: 1 !important; transform: none !important; animation: none !important; }
   .sec-head::after { display: none !important; }

@@ -130,7 +130,7 @@ window.CV_DATA = {
     },
     {
       title: { sk: "AI Prompt Engineering & vlastní AI asistenti", en: "AI Prompt Engineering & Custom AI Assistants" },
-      desc: { sk: "Intenzívne testovanie a tvorba efektívnych promptov pre ChatGPT a Claude. Vlastní AI asistenti, workflow automatizácia a 17+ certifikátov z oblasti AI.", en: "Intensive testing and creation of effective prompts for ChatGPT and Claude. Custom AI assistants, workflow automation and 17+ AI certificates." },
+      desc: { sk: "Intenzívne testovanie a tvorba efektívnych promptov pre ChatGPT a Claude. Vlastní AI asistenti, workflow automatizácia a 20+ certifikátov z oblasti AI.", en: "Intensive testing and creation of effective prompts for ChatGPT and Claude. Custom AI assistants, workflow automation and 20+ AI certificates." },
       url: "https://github.com/Apoliak7777/AI-Promt-Manager",
       tags: ["AI", "Prompt Engineering", "Claude", "GPTs", "MCP"]
     }
@@ -161,26 +161,39 @@ window.CV_DATA = {
   ],
 
   /* Certifikáty — v render sa automaticky zoskupia podľa poľa "issuer".
-     Poradie skupín = poradie prvého výskytu vydavateľa v tomto zozname. */
+     Poradie skupín = poradie prvého výskytu vydavateľa v tomto zozname.
+     img = originál certifikátu (otvorí sa vo veľkom), náhľad je certifikaty/nahlady/<názov>.webp,
+     w/h = rozmery náhľadu, url = overovací odkaz vydavateľa (tlačidlo „Overiť certifikát"). */
   certificates: [
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude 101" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude Code in Action" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Introduction to Claude Cowork" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency: Framework & Foundations" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude with the Anthropic API" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency: AI Capabilities & Limitations" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Introduction to Subagents" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency for Nonprofits" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency for Students" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency for Educators" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Model Context Protocol: Advanced Topics" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Introduction to Model Context Protocol" },
-    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude with Google Vertex AI" },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude 101", img: "certifikaty/claude-101.jpg", w: 560, h: 424, url: "https://verify.skilljar.com/c/uq8homniz6fr" },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude Code 101", img: "certifikaty/claude-code-101.jpg", w: 560, h: 417 },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude Code in Action", img: "certifikaty/claude-code-in-action.jpg", w: 560, h: 415, url: "https://verify.skilljar.com/c/ru8sua8vsdww" },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Introduction to Claude Cowork", img: "certifikaty/claude-cowork.jpg", w: 560, h: 416 },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency: Framework & Foundations", img: "certifikaty/ai-fluency-framework-foundations.jpg", w: 560, h: 415 },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude with the Anthropic API", img: "certifikaty/claude-anthropic-api.jpg", w: 560, h: 420, url: "https://verify.skilljar.com/c/gsan9wqwnmam" },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency: AI Capabilities & Limitations", img: "certifikaty/ai-fluency-capabilities-limitations.jpg", w: 560, h: 423 },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Introduction to Subagents", img: "certifikaty/subagents.jpg", w: 560, h: 408 },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Introduction to Agent Skills", img: "certifikaty/agent-skills.jpg", w: 560, h: 426 },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency for Nonprofits", img: "certifikaty/ai-fluency-nonprofits.jpg", w: 560, h: 414 },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency for Students", img: "certifikaty/ai-fluency-students.jpg", w: 560, h: 417 },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "AI Fluency for Educators", img: "certifikaty/ai-fluency-educators.jpg", w: 560, h: 418 },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Model Context Protocol: Advanced Topics", img: "certifikaty/mcp-advanced-topics.jpg", w: 560, h: 418, url: "https://verify.skilljar.com/c/f8zjfiwfvasv" },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Introduction to Model Context Protocol", img: "certifikaty/mcp-introduction.jpg", w: 560, h: 421, url: "https://verify.skilljar.com/c/jadk83o69zeh" },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude with Google Vertex AI", img: "certifikaty/claude-google-vertex-ai.jpg", w: 560, h: 413, url: "https://verify.skilljar.com/c/k9tphskgvvax" },
+    { issuer: "Anthropic", when: { sk: "Máj 2026", en: "May 2026" }, title: "Claude with Amazon Bedrock", img: "certifikaty/claude-amazon-bedrock.jpg", w: 560, h: 425, url: "https://verify.skilljar.com/c/e6nupvti8u4d" },
+    { issuer: "Anthropic", when: { sk: "September 2026", en: "September 2026" }, title: "Claude Platform 101", img: "certifikaty/claude-platform-101.jpg", w: 560, h: 422 },
+    { issuer: "Anthropic", when: { sk: "September 2026", en: "September 2026" }, title: "AI Fluency for Builders", img: "certifikaty/ai-fluency-builders.jpg", w: 560, h: 410 },
+    { issuer: "Anthropic", when: { sk: "September 2026", en: "September 2026" }, title: "AI Fluency for K-12 Educators", img: "certifikaty/ai-fluency-k12-educators.jpg", w: 560, h: 421 },
+    { issuer: "Anthropic", when: { sk: "September 2026", en: "September 2026" }, title: "AI Fluency for Creative Work", img: "certifikaty/ai-fluency-creative-work.jpg", w: 560, h: 412 },
 
-    { issuer: "Vanderbilt University · Coursera", when: { sk: "Október – November 2025", en: "October – November 2025" }, title: "Prompt Engineering for ChatGPT" },
+    { issuer: "Vanderbilt University · Coursera", when: { sk: "December 2025", en: "December 2025" }, title: "Prompt Engineering for ChatGPT", img: "certifikaty/coursera-prompt-engineering-chatgpt.jpg", w: 560, h: 425, url: "https://coursera.org/verify/8A5BH7JHN4SU" },
     { issuer: "Vanderbilt University · Coursera", when: { sk: "Október – November 2025", en: "October – November 2025" }, title: "Advanced Prompt Engineering for Everyone" },
     { issuer: "Vanderbilt University · Coursera", when: { sk: "Október – November 2025", en: "October – November 2025" }, title: "OpenAI GPTs: Creating Your Own Custom AI Assistants" },
-    { issuer: "Vanderbilt University · Coursera", when: { sk: "December 2025 – Január 2026", en: "December 2025 – January 2026" }, title: "ChatGPT: Master Free AI Tools to Supercharge Productivity" }
+    { issuer: "Vanderbilt University · Coursera", when: { sk: "December 2025 – Január 2026", en: "December 2025 – January 2026" }, title: "ChatGPT: Master Free AI Tools to Supercharge Productivity" },
+
+    { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Introduction to Cybersecurity", img: "certifikaty/cisco-introduction-cybersecurity.jpg", w: 560, h: 421, url: "https://www.credly.com/badges/3cd04039-59c4-49fd-9889-2e5d6ffbaf48" },
+
+    { issuer: "STEP IT Academy", when: "2023", title: "STEP IT Academy Junior", img: "certifikaty/step-it-academy-junior.jpg", w: 560, h: 391 }
   ],
 
   /* Záujmy a koníčky — jednoduchý zoznam, každý s krátkym popisom */

@@ -37,6 +37,23 @@
   <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- prehliadač certifikátov: obsah dopĺňa lbShow() -->
+  <div class="lb" id="lb" role="dialog" aria-modal="true" aria-labelledby="lb-title" hidden>
+    <div class="lb-stage">
+      <figure class="lb-fig">
+        <img class="lb-img" alt="">
+        <figcaption class="lb-cap">
+          <span class="lb-title" id="lb-title"></span>
+          <span class="lb-meta"></span>
+          <span class="lb-row"><span class="lb-count"></span><a class="lb-verify" target="_blank" rel="noopener" hidden></a></span>
+        </figcaption>
+      </figure>
+    </div>
+    <button type="button" class="lb-btn lb-close" aria-label="Zavrieť"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button type="button" class="lb-btn lb-prev" aria-label="Predchádzajúci certifikát"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button type="button" class="lb-btn lb-next" aria-label="Ďalší certifikát"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+
   <button type="button" class="fab-top" id="fab-top" aria-label="Späť hore / Back to top" title="Späť hore / Back to top">&#8593;</button>
 
   <div class="lang" role="group" aria-label="Jazyk / Language">
@@ -66,7 +83,12 @@
 
     var D = window.CV_DATA;
     var lang = 'sk';
-    var CERT_PREVIEW = 5;
+    var CERT_PREVIEW = 5;       // textové štítky na vydavateľa pred „Zobraziť ďalších"
+    var CERT_PREVIEW_IMG = 6;   // kartičky s obrázkom = dva riadky po troch
+    var lbList = [];            // certifikáty s obrázkom v poradí, v akom sú na stránke (pre listovanie)
+    var lbIndex = -1;           // otvorený certifikát v prehliadači, -1 = zavretý
+    var lbReturnFocus = null;
+    var lbReturnIdx = 0;
     var toastTimer;
     var spyIO;
     var statsIO;
@@ -91,6 +113,10 @@
     function plCert(n, l) {
       if (l === 'sk') return n === 1 ? 'certifikát' : (n >= 2 && n <= 4 ? 'certifikáty' : 'certifikátov');
       return n === 1 ? 'certificate' : 'certificates';
+    }
+    // náhľad certifikátu: certifikaty/x.jpg → certifikaty/nahlady/x.webp (ak nie je zadaný ručne cez "thumb")
+    function certThumb(c) {
+      return c.thumb || String(c.img || '').replace(/([^\/]+?)(\.[a-z0-9]+)?$/i, 'nahlady/$1.webp');
     }
 
     /* Rozsah dátumov skupiny certifikátov.
@@ -431,28 +457,51 @@
         });
         var palette = ['var(--accent-2)', 'var(--accent-3)', 'var(--accent)'];
         var s = '';
+        lbList = [];
         groups.forEach(function (g, gi) {
           var col = palette[gi % palette.length];
           var whens = Object.keys(g.whens);
           var whenTxt = whens.length ? certRange(whens, lang) : '';
           var word = plCert(g.items.length, lang);
+          // skupina, v ktorej má niektorý certifikát obrázok, sa kreslí ako galéria kartičiek
+          var gallery = g.items.some(function (c) { return !!c.img; });
+          var preview = gallery ? CERT_PREVIEW_IMG : CERT_PREVIEW;
           s += '<div class="cert-group" style="--cg:' + col + '">'
              + '<div class="cert-group-head">'
              + '<span class="cert-issuer-dot"></span>'
              + '<span class="cert-issuer">' + esc(g.issuer) + '</span>'
              + '<span class="cert-badge">' + g.items.length + ' ' + word + '</span>'
              + (whenTxt ? '<span class="cert-when">' + esc(whenTxt) + '</span>' : '')
-             + '</div><div class="cert-chips">';
-          g.items.forEach(function (c, ci) {
-            var hidden = ci >= CERT_PREVIEW ? ' is-hidden' : '';
+             + '</div><div class="cert-chips' + (gallery ? ' cert-gallery' : '') + '">';
+          // v galérii najprv kartičky s obrázkom, certifikáty bez obrázka pod nimi ako štítky
+          var list = gallery
+            ? g.items.filter(function (c) { return c.img; }).concat(g.items.filter(function (c) { return !c.img; }))
+            : g.items;
+          var chipsOpen = false;
+          list.forEach(function (c, ci) {
+            var hidden = ci >= preview ? ' is-hidden' : '';
+            var title = t(c.title, lang);
+            if (c.img) {
+              // kartička s náhľadom → klik otvorí certifikát vo veľkom (lightbox)
+              var li = lbList.length;
+              lbList.push({ c: c, issuer: g.issuer });
+              s += '<button type="button" class="cert-card' + hidden + '" data-lb="' + li + '" aria-haspopup="dialog" aria-label="'
+                 + esc((lang === 'sk' ? 'Zobraziť certifikát: ' : 'View certificate: ') + title) + '">'
+                 + '<span class="cert-thumb"><img src="' + esc(safeUrl(certThumb(c))) + '" alt="" loading="lazy" decoding="async"'
+                 + (c.w && c.h ? ' width="' + c.w + '" height="' + c.h + '"' : '') + '></span>'
+                 + '<span class="cert-card-body"><span class="cert-tick">&#10003;</span>'
+                 + '<span class="cert-name">' + esc(title) + '</span></span></button>';
+              return;
+            }
+            if (gallery && !chipsOpen) { s += '</div><div class="cert-chips cert-chips-rest">'; chipsOpen = true; }
             var curl = safeUrl(c.url);
             var chipTag = curl ? 'a' : 'div';
             var chipHref = curl ? ' href="' + esc(curl) + '" target="_blank" rel="noopener"' : '';
             s += '<' + chipTag + ' class="cert-chip' + hidden + '"' + chipHref + '><span class="cert-tick">&#10003;</span>'
-               + '<span class="cert-name">' + esc(t(c.title, lang)) + (curl ? ' &#8599;' : '') + '</span></' + chipTag + '>';
+               + '<span class="cert-name">' + esc(title) + (curl ? ' &#8599;' : '') + '</span></' + chipTag + '>';
           });
-          if (g.items.length > CERT_PREVIEW) {
-            var more = g.items.length - CERT_PREVIEW;
+          if (g.items.length > preview) {
+            var more = g.items.length - preview;
             s += '<button type="button" class="cert-more" data-more="' + more + '">'
                + (lang === 'sk' ? 'Zobraziť ďalších ' + more : 'Show ' + more + ' more') + '</button>';
           }
@@ -564,7 +613,120 @@
     }
     window.addEventListener('scroll', onScroll, { passive: true });
 
+    /* ---- prehliadač certifikátov (lightbox) --------------------------------
+       Kostra je natvrdo v <body> (#lb) mimo #app, takže prežije render()
+       pri prepnutí jazyka. Listuje sa cez všetky certifikáty s obrázkom
+       naprieč vydavateľmi — šípkami, tlačidlami aj potiahnutím prstom. */
+    function lbEl(sel) { return document.querySelector('#lb ' + sel); }
+
+    function lbShow(i) {
+      var n = lbList.length;
+      if (!n) return;
+      lbIndex = (i + n) % n;
+      var it = lbList[lbIndex], c = it.c;
+      var img = lbEl('.lb-img');
+      var title = t(c.title, lang);
+      img.classList.add('is-loading');
+      img.onload = img.onerror = function () { img.classList.remove('is-loading'); };
+      img.src = safeUrl(c.img);
+      img.alt = (lang === 'sk' ? 'Certifikát: ' : 'Certificate: ') + title;
+      lbEl('.lb-title').textContent = title;
+      lbEl('.lb-meta').textContent = it.issuer + (t(c.when, lang) ? ' · ' + t(c.when, lang) : '');
+      lbEl('.lb-count').textContent = (lbIndex + 1) + ' / ' + n;
+      var v = lbEl('.lb-verify'), vurl = safeUrl(c.url);
+      if (vurl && isExternal(vurl)) {
+        v.href = vurl;
+        v.textContent = (lang === 'sk' ? 'Overiť certifikát' : 'Verify certificate') + ' ↗';
+        v.hidden = false;
+      } else {
+        v.hidden = true;
+        v.removeAttribute('href');
+      }
+      var one = n < 2;
+      lbEl('.lb-prev').hidden = one;
+      lbEl('.lb-next').hidden = one;
+      lbEl('.lb-close').setAttribute('aria-label', lang === 'sk' ? 'Zavrieť' : 'Close');
+      lbEl('.lb-prev').setAttribute('aria-label', lang === 'sk' ? 'Predchádzajúci certifikát' : 'Previous certificate');
+      lbEl('.lb-next').setAttribute('aria-label', lang === 'sk' ? 'Ďalší certifikát' : 'Next certificate');
+      // susedov načítame dopredu, aby listovanie nečakalo na sieť
+      [lbIndex - 1, lbIndex + 1].forEach(function (k) {
+        var nb = lbList[(k + n) % n];
+        if (nb) { var pre = new Image(); pre.src = safeUrl(nb.c.img); }
+      });
+    }
+
+    function lbOpen(i) {
+      var lb = document.getElementById('lb');
+      if (!lb || !lbList.length) return;
+      lbReturnFocus = document.activeElement;
+      lbReturnIdx = i;
+      lbShow(i);
+      lb.hidden = false;
+      document.documentElement.classList.add('lb-lock');
+      // .open až v ďalšom snímku, aby sa prechod opacity naozaj prehral
+      requestAnimationFrame(function () { lb.classList.add('open'); });
+      lbEl('.lb-close').focus();
+    }
+
+    function lbClose() {
+      var lb = document.getElementById('lb');
+      if (!lb || lbIndex < 0) return;
+      lbIndex = -1;
+      lb.classList.remove('open');
+      lb.hidden = true;
+      lbEl('.lb-img').removeAttribute('src');
+      document.documentElement.classList.remove('lb-lock');
+      // po prepnutí jazyka pôvodné tlačidlo už v DOM nie je → nájdeme jeho nástupcu
+      var back = lbReturnFocus;
+      if (!back || !document.contains(back)) back = document.querySelector('.cert-card[data-lb="' + lbReturnIdx + '"]');
+      if (back) back.focus();
+    }
+
+    function lbInit() {
+      var lb = document.getElementById('lb');
+      if (!lb || lb.getAttribute('data-ready')) return;
+      lb.setAttribute('data-ready', '1');
+      lbEl('.lb-close').onclick = lbClose;
+      lbEl('.lb-prev').onclick = function () { lbShow(lbIndex - 1); };
+      lbEl('.lb-next').onclick = function () { lbShow(lbIndex + 1); };
+      // klik mimo obrázka a ovládacích prvkov zatvára
+      lb.addEventListener('click', function (e) {
+        if (e.target === lb || e.target.classList.contains('lb-stage')) lbClose();
+      });
+      // potiahnutie prstom doľava/doprava = ďalší/predchádzajúci
+      var sx = null, sy = null;
+      lb.addEventListener('touchstart', function (e) {
+        if (e.touches.length !== 1) { sx = null; return; }
+        sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+      }, { passive: true });
+      lb.addEventListener('touchend', function (e) {
+        if (sx == null) return;
+        var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+        sx = null;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) lbShow(lbIndex + (dx < 0 ? 1 : -1));
+      }, { passive: true });
+    }
+
+    function lbKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); lbClose(); return; }
+      if (e.key === 'ArrowRight') { e.preventDefault(); lbShow(lbIndex + 1); return; }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); lbShow(lbIndex - 1); return; }
+      if (e.key === 'Tab') {
+        // fokus ostáva v okne prehliadača, kým je otvorené
+        var f = Array.prototype.filter.call(
+          document.querySelectorAll('#lb button, #lb a[href]'),
+          function (el) { return !el.hidden; });
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+
     function bindInteractions() {
+      document.querySelectorAll('.cert-card').forEach(function (card) {
+        card.onclick = function () { lbOpen(parseInt(card.getAttribute('data-lb'), 10) || 0); };
+      });
       document.querySelectorAll('.cert-more').forEach(function (btn) {
         btn.onclick = function () {
           var group = btn.closest('.cert-group');
@@ -608,10 +770,12 @@
       lang = l;
       try { localStorage.setItem('lang', l); sessionStorage.setItem('lang', l); } catch (e) {}
       render();
+      if (lbIndex >= 0) lbShow(lbIndex);   // otvorený certifikát preložíme tiež
       onScroll();
     }
 
     document.addEventListener('keydown', function (e) {
+      if (lbIndex >= 0) { lbKey(e); return; }
       if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
       if (e.key === 'e' || e.key === 'E') setLang('en');
       if (e.key === 's' || e.key === 'S') setLang('sk');
@@ -626,6 +790,7 @@
       try {
         if (!window.CV_DATA) throw new Error('content.js sa nenačítal — musí byť v rovnakom priečinku ako index.html');
         render();
+        lbInit();
       } catch (err) {
         document.getElementById('app').innerHTML =
           '<div style="padding:80px 0;color:#f4f5f7;font:16px/1.6 sans-serif">'

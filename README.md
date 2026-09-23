@@ -41,7 +41,7 @@
 
 Osobné portfólio a online životopis ako jedna statická stránka. Všetok obsah žije v obyčajnom JavaScript objekte `window.CV_DATA` v súbore `content.js`; `index.html` obsahuje kompletné markup, CSS aj renderovací JavaScript inline — prečíta dátový objekt a za behu poskladá celú stránku ako HTML reťazec.
 
-Cieľom je nulová prevádzková réžia: nie je tu package manager, build step, backend ani databáza. Úprava životopisu = úprava jedného objektu v `content.js` a refresh prehliadača. Hosting = nahratie šiestich súborov (`index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js`, `og-image.svg`) na akýkoľvek statický hosting.
+Cieľom je nulová prevádzková réžia: nie je tu package manager, build step, backend ani databáza. Úprava životopisu = úprava jedného objektu v `content.js` a refresh prehliadača. Hosting = nahratie šiestich súborov (`index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js`, `og-image.svg`) a priečinka `certifikaty/` na akýkoľvek statický hosting.
 
 Stránka je od začiatku dvojjazyčná — každý text je pár `{ sk, en }` a prepnutie jazyka len znovu spustí `render()`, bez reloadu.
 
@@ -53,7 +53,8 @@ Stránka je od začiatku dvojjazyčná — každý text je pár `{ sk, en }` a p
 - 🧩 **Plne dátovo riadený render** — hero, odkazy, štatistiky, všetky sekcie aj pätička vznikajú z `window.CV_DATA`. Poradie a viditeľnosť sekcií riadi `sections.order` a `show: true/false`, prázdne sekcie sa preskočia a čísla sekcií (01, 02, ...) sa prečíslujú automaticky.
 - 🎨 **Téma z dát** — `meta.accent`, `accent2` a `accent3` sa pri renderi zapisujú do CSS custom properties na `:root`, takže celá paleta sa mení z `content.js`.
 - 🗂️ **Šesť typov sekcií s vlastným layoutom** — časová os skúseností (badge `teraz` pri `current: true`), mriežka projektov (`featured: true` dostane akcentový rám a badge `Hlavný`/`Featured`), riadky schopností, vzdelanie s badge `študujem`/`studying`, certifikáty a kartičky záujmov.
-- 🏅 **Automatické zoskupenie certifikátov** — podľa poľa `issuer`, každá skupina má rotujúcu akcentovú farbu, rozsah dátumov, počet so správnym slovenským skloňovaním (certifikát / certifikáty / certifikátov) a tlačidlo na rozbalenie všetkého nad prvých päť. Rozsah dátumov skupiny sa počíta z jednotlivých `when` hodnôt (napr. `Október – November 2025` + `December 2025 – Január 2026` → `Október 2025 – Január 2026`).
+- 🏅 **Automatické zoskupenie certifikátov** — podľa poľa `issuer`, každá skupina má rotujúcu akcentovú farbu, rozsah dátumov, počet so správnym slovenským skloňovaním (certifikát / certifikáty / certifikátov) a tlačidlo na rozbalenie všetkého nad prvých päť (pri galérii s obrázkami nad prvých šesť). Rozsah dátumov skupiny sa počíta z jednotlivých `when` hodnôt (napr. `Október – November 2025` + `December 2025 – Január 2026` → `Október 2025 – Január 2026`).
+- 🖼️ **Galéria certifikátov s originálmi** — certifikát s poľom `img` sa namiesto textového štítku vykreslí ako kartička s náhľadom. Klik otvorí originál vo veľkom okne (lightbox) s listovaním naprieč všetkými certifikátmi — šípky na klávesnici, tlačidlá, potiahnutie prstom na mobile, `Esc` zatvára, fokus ostáva v okne a po zatvorení sa vráti na kartičku. Pri certifikáte s `url` je v okne tlačidlo *Overiť certifikát ↗* na overovaciu stránku vydavateľa. Certifikáty skupiny bez obrázka sa vypíšu ako štítky pod galériou; v tlači sa náhľady skryjú a ostane zoznam názvov.
 - 📊 **Animované počítadlá** — počty skúseností, certifikátov a projektov sa odvodzujú z dát (nie sú natvrdo napísané) a odpočítavajú sa nahor s cubic easingom, keď sa dostanú do viewportu.
 - 🔍 **SEO a social metadáta za behu** — `<title>`, `description`, `og:title`, `og:description`, `og:image`, `og:url`, `twitter:image`, `canonical`, `hreflang` (sk / en / x-default) a JSON-LD blok `schema.org/Person` sa vkladajú a aktualizujú pri každej zmene jazyka.
 - 🎯 **Favicon z monogramu** — SVG data URI sa generuje z iniciál mena a nastavenej akcentovej farby, nahrádza fallback v `<head>`.
@@ -107,6 +108,8 @@ Apoliak-CV-online/
 ├── content.js      # obsah životopisu — window.CV_DATA
 ├── projects.js     # obsah podstránky projektov — window.PROJECTS_DATA
 ├── og-image.svg    # ručne písaná 1200x630 náhľadová karta pre zdieľanie odkazu
+├── certifikaty/    # originály certifikátov (otvárajú sa vo veľkom)
+│   └── nahlady/    # zmenšené náhľady 560 px vo WebP pre kartičky galérie
 ├── README.md       # tento súbor (stránka ho nenačítava, na hosting ho netreba)
 └── README.en.md    # anglický preklad tohto súboru
 ```
@@ -155,7 +158,7 @@ Celá konfigurácia je v bloku `meta` v `content.js`. Žiadne premenné prostred
 | `sections.<key>.more`             | len pri projektoch | `{ url, count, label }` — vykreslí pod sekciou tlačidlo na podstránku. `count` zároveň prepíše číslo v počítadle (na hlavnej je len výber projektov, počítadlo hlási skutočný počet) |
 
 > [!NOTE]
-> Hlavná ladiaca konštanta mimo `content.js` je `CERT_PREVIEW = 5` v inline skripte `index.html` — koľko certifikátov na vydavateľa sa zobrazí pred tlačidlom *Zobraziť ďalších N*. Okrem nej sú v `index.html` natvrdo aj fallback favicon (monogram „AP" a farba `#d6ff4b`), statický `<title>Portfólio</title>`, `theme-color` (statická hodnota v `<head>`, ktorú `render()` prepíše vypočítaným pozadím `body`), `og:locale` (`sk_SK`), rozmery OG obrázka, krajina `SK` v JSON-LD adrese a celá `:root` fallback paleta, ktorej `--accent` / `--accent-2` / `--accent-3` duplikujú hodnoty z `content.js`.
+> Hlavné ladiace konštanty mimo `content.js` sú `CERT_PREVIEW = 5` a `CERT_PREVIEW_IMG = 6` v inline skripte `index.html` — koľko certifikátov na vydavateľa sa zobrazí pred tlačidlom *Zobraziť ďalších N* (textové štítky / galéria s obrázkami). Okrem nej sú v `index.html` natvrdo aj fallback favicon (monogram „AP" a farba `#d6ff4b`), statický `<title>Portfólio</title>`, `theme-color` (statická hodnota v `<head>`, ktorú `render()` prepíše vypočítaným pozadím `body`), `og:locale` (`sk_SK`), rozmery OG obrázka, krajina `SK` v JSON-LD adrese a celá `:root` fallback paleta, ktorej `--accent` / `--accent-2` / `--accent-3` duplikujú hodnoty z `content.js`.
 
 ---
 
@@ -171,7 +174,7 @@ Celá konfigurácia je v bloku `meta` v `content.js`. Žiadne premenné prostred
 | `projects`    | pole    | `featured`, `title`, `desc`, `url`, `tags[]`                                               |
 | `skills`      | pole    | `name`, `detail`                                                                           |
 | `education`   | pole    | `current`, `when`, `title`, `place`, `desc`                                                |
-| `certificates`| pole    | `issuer`, `when`, `title`, voliteľne `url`                                                 |
+| `certificates`| pole    | `issuer`, `when`, `title`, voliteľne `url` (overovací odkaz), `img` (originál v `certifikaty/`), `w`/`h` (rozmery náhľadu) a `thumb` (vlastná cesta k náhľadu) |
 | `interests`   | pole    | `name`, `detail`                                                                           |
 | `footer`      | objekt  | `email`                                                                                    |
 
@@ -185,6 +188,8 @@ Stránka registruje jediný `keydown` listener s dvomi skratkami:
 | ------- | ------------------------ |
 | `S`     | prepnutie na slovenčinu  |
 | `E`     | prepnutie na angličtinu  |
+
+Kým je otvorený certifikát vo veľkom okne, platia namiesto nich `←` / `→` (predchádzajúci / ďalší), `Esc` (zavrieť) a `Tab` (krúži len medzi tlačidlami okna).
 
 Skratky sú potlačené, kým je fokus v `INPUT`, `TEXTAREA` alebo `SELECT`.
 
@@ -212,7 +217,7 @@ O výsledný vzhľad sa stará `@media print` stylesheet. Nerobí z dokumentu ho
 
 ## 🌐 Nasadenie
 
-Nahraj všetkých šesť súborov — `index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js` a `og-image.svg` — tak, ako sú, na akýkoľvek statický hosting: GitHub Pages, Netlify, Vercel, obyčajný nginx alebo Apache. `README.md` a `README.en.md` môžeš nahrať tiež, stránka ich nepoužíva. Žiadne PHP, žiadna databáza, žiadne prostredie.
+Nahraj všetkých šesť súborov — `index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js` a `og-image.svg` — aj s priečinkom `certifikaty/` tak, ako sú, na akýkoľvek statický hosting: GitHub Pages, Netlify, Vercel, obyčajný nginx alebo Apache. `README.md` a `README.en.md` môžeš nahrať tiež, stránka ich nepoužíva. Žiadne PHP, žiadna databáza, žiadne prostredie.
 
 Pred nasadením:
 

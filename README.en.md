@@ -41,7 +41,7 @@
 
 A personal portfolio and online résumé built as a single static page. All content lives in a plain JavaScript object `window.CV_DATA` inside `content.js`; `index.html` contains the complete markup, CSS and rendering JavaScript inline — it reads the data object and assembles the whole page as an HTML string at runtime.
 
-The goal is zero operational overhead: there is no package manager, no build step, no backend and no database. Editing the CV means editing one object in `content.js` and refreshing the browser. Hosting means uploading six files (`index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js`, `og-image.svg`) to any static host.
+The goal is zero operational overhead: there is no package manager, no build step, no backend and no database. Editing the CV means editing one object in `content.js` and refreshing the browser. Hosting means uploading six files (`index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js`, `og-image.svg`) and the `certifikaty/` folder to any static host.
 
 The site is bilingual from the ground up — every piece of text is a `{ sk, en }` pair, and switching the language simply re-runs `render()`, without a reload.
 
@@ -53,7 +53,8 @@ The site is bilingual from the ground up — every piece of text is a `{ sk, en 
 - 🧩 **Fully data-driven rendering** — the hero, links, stats, all sections and the footer are generated from `window.CV_DATA`. Section order and visibility are controlled by `sections.order` and `show: true/false`; empty sections are skipped and section numbers (01, 02, ...) are renumbered automatically.
 - 🎨 **Theme from data** — `meta.accent`, `accent2` and `accent3` are written into CSS custom properties on `:root` during rendering, so the entire palette is controlled from `content.js`.
 - 🗂️ **Six section types, each with its own layout** — an experience timeline (a `teraz`/`now` badge when `current: true`), a project grid (`featured: true` gets an accent frame and a `Hlavný`/`Featured` badge), skill rows, education with a `študujem`/`studying` badge, certificates and interest cards.
-- 🏅 **Automatic certificate grouping** — grouped by the `issuer` field; each group gets a rotating accent colour, a date range, a count with correct Slovak declension (certifikát / certifikáty / certifikátov) and a button to expand everything beyond the first five. The group date range is computed from the individual `when` values (e.g. `October – November 2025` + `December 2025 – January 2026` → `October 2025 – January 2026`).
+- 🏅 **Automatic certificate grouping** — grouped by the `issuer` field; each group gets a rotating accent colour, a date range, a count with correct Slovak declension (certifikát / certifikáty / certifikátov) and a button to expand everything beyond the first five (beyond the first six in an image gallery). The group date range is computed from the individual `when` values (e.g. `October – November 2025` + `December 2025 – January 2026` → `October 2025 – January 2026`).
+- 🖼️ **Certificate gallery with the originals** — a certificate with an `img` field is rendered as a thumbnail card instead of a text chip. Clicking it opens the original in a large viewer (lightbox) that pages through every certificate — arrow keys, buttons, swipe on mobile, `Esc` closes, focus stays inside the viewer and returns to the card on close. A certificate with a `url` gets a *Verify certificate ↗* button leading to the issuer's verification page. Certificates of a group without an image are listed as chips below the gallery; in print the thumbnails are hidden and a plain list of titles remains.
 - 📊 **Animated counters** — the counts of experience entries, certificates and projects are derived from the data (not hardcoded) and count up with cubic easing once they enter the viewport.
 - 🔍 **Runtime SEO and social metadata** — `<title>`, `description`, `og:title`, `og:description`, `og:image`, `og:url`, `twitter:image`, `canonical`, `hreflang` (sk / en / x-default) and a `schema.org/Person` JSON-LD block are injected and updated on every language change.
 - 🎯 **Monogram favicon** — an SVG data URI is generated from the initials of the name and the configured accent colour, replacing the fallback in `<head>`.
@@ -107,6 +108,8 @@ Apoliak-CV-online/
 ├── content.js      # the CV content — window.CV_DATA
 ├── projects.js     # the projects page content — window.PROJECTS_DATA
 ├── og-image.svg    # hand-written 1200x630 preview card for link sharing
+├── certifikaty/    # certificate originals (opened in the large viewer)
+│   └── nahlady/    # 560 px WebP thumbnails for the gallery cards
 ├── README.md       # the Slovak original (the site does not load it, it is not needed for hosting)
 └── README.en.md    # this file — the English translation
 ```
@@ -155,7 +158,7 @@ The entire configuration lives in the `meta` block in `content.js`. No environme
 | `sections.<key>.more`             | projects only      | `{ url, count, label }` — renders a button to the sub-page below the section. `count` also overrides the counter (the home page only shows a selection, the counter reports the real total) |
 
 > [!NOTE]
-> The main tuning constant outside `content.js` is `CERT_PREVIEW = 5` in the inline script of `index.html` — how many certificates per issuer are shown before the *Show N more* button. Besides it, `index.html` also hardcodes the fallback favicon (the "AP" monogram and the colour `#d6ff4b`), the static `<title>Portfólio</title>`, `theme-color` (a static value in `<head>` that `render()` overwrites with the computed `body` background), `og:locale` (`sk_SK`), the OG image dimensions, the `SK` country in the JSON-LD address and the entire `:root` fallback palette, whose `--accent` / `--accent-2` / `--accent-3` duplicate the values from `content.js`.
+> The main tuning constants outside `content.js` are `CERT_PREVIEW = 5` and `CERT_PREVIEW_IMG = 6` in the inline script of `index.html` — how many certificates per issuer are shown before the *Show N more* button (text chips / image gallery). Besides it, `index.html` also hardcodes the fallback favicon (the "AP" monogram and the colour `#d6ff4b`), the static `<title>Portfólio</title>`, `theme-color` (a static value in `<head>` that `render()` overwrites with the computed `body` background), `og:locale` (`sk_SK`), the OG image dimensions, the `SK` country in the JSON-LD address and the entire `:root` fallback palette, whose `--accent` / `--accent-2` / `--accent-3` duplicate the values from `content.js`.
 
 ---
 
@@ -171,7 +174,7 @@ The entire configuration lives in the `meta` block in `content.js`. No environme
 | `projects`    | array   | `featured`, `title`, `desc`, `url`, `tags[]`                                               |
 | `skills`      | array   | `name`, `detail`                                                                           |
 | `education`   | array   | `current`, `when`, `title`, `place`, `desc`                                                |
-| `certificates`| array   | `issuer`, `when`, `title`, optionally `url`                                                |
+| `certificates`| array   | `issuer`, `when`, `title`, optionally `url` (verification link), `img` (original in `certifikaty/`), `w`/`h` (thumbnail size) and `thumb` (custom thumbnail path) |
 | `interests`   | array   | `name`, `detail`                                                                           |
 | `footer`      | object  | `email`                                                                                    |
 
@@ -185,6 +188,8 @@ The page registers a single `keydown` listener with two shortcuts:
 | ------- | ------------------------ |
 | `S`     | switch to Slovak         |
 | `E`     | switch to English        |
+
+While a certificate is open in the large viewer, `←` / `→` (previous / next), `Esc` (close) and `Tab` (cycles only through the viewer's buttons) apply instead.
 
 The shortcuts are suppressed while focus is inside an `INPUT`, `TEXTAREA` or `SELECT`.
 
@@ -212,7 +217,7 @@ The `@media print` stylesheet takes care of how the result looks. It does not re
 
 ## 🌐 Deployment
 
-Upload all six files — `index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js` and `og-image.svg` — exactly as they are to any static host: GitHub Pages, Netlify, Vercel, plain nginx or Apache. You can upload `README.md` and `README.en.md` as well; the site does not use them. No PHP, no database, no runtime environment.
+Upload all six files — `index.html`, `projekty.html`, `style.css`, `content.js`, `projects.js` and `og-image.svg` — plus the `certifikaty/` folder exactly as they are to any static host: GitHub Pages, Netlify, Vercel, plain nginx or Apache. You can upload `README.md` and `README.en.md` as well; the site does not use them. No PHP, no database, no runtime environment.
 
 Before deploying:
 
