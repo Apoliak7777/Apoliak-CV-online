@@ -187,9 +187,6 @@ window.CV_DATA = {
     { issuer: "Anthropic", when: { sk: "September 2026", en: "September 2026" }, title: "AI Fluency for Creative Work", img: "certifikaty/ai-fluency-creative-work.jpg", w: 560, h: 412 },
 
     { issuer: "Vanderbilt University · Coursera", when: { sk: "December 2025", en: "December 2025" }, title: "Prompt Engineering for ChatGPT", img: "certifikaty/coursera-prompt-engineering-chatgpt.jpg", w: 560, h: 425, url: "https://coursera.org/verify/8A5BH7JHN4SU" },
-    { issuer: "Vanderbilt University · Coursera", when: { sk: "Október – November 2025", en: "October – November 2025" }, title: "Advanced Prompt Engineering for Everyone" },
-    { issuer: "Vanderbilt University · Coursera", when: { sk: "Október – November 2025", en: "October – November 2025" }, title: "OpenAI GPTs: Creating Your Own Custom AI Assistants" },
-    { issuer: "Vanderbilt University · Coursera", when: { sk: "December 2025 – Január 2026", en: "December 2025 – January 2026" }, title: "ChatGPT: Master Free AI Tools to Supercharge Productivity" },
 
     { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Introduction to Cybersecurity", img: "certifikaty/cisco-introduction-cybersecurity.jpg", w: 560, h: 421, url: "https://www.credly.com/badges/3cd04039-59c4-49fd-9889-2e5d6ffbaf48" },
 

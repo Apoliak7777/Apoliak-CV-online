@@ -710,9 +710,9 @@ body::after {
 .cert-card:hover .cert-thumb img { transform: scale(1.035); filter: none; }
 /* lupa v rohu náhľadu — naznačí, že sa dá otvoriť vo veľkom */
 .cert-thumb::after {
-  content: "922"; position: absolute; right: 8px; bottom: 8px;
+  content: ""; position: absolute; right: 8px; bottom: 8px;
   width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
-  font-size: 14px; color: #fff; background: rgba(10,11,13,.66);
+  background: rgba(10,11,13,.66) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='M16 16l4.5 4.5M11 8.5v5M8.5 11h5'/%3E%3C/svg%3E") center / 16px no-repeat;
   -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
   opacity: 0; transform: translateY(4px); transition: opacity .2s var(--ease), transform .2s var(--ease);
 }
