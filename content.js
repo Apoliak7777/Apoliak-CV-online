@@ -52,10 +52,16 @@ window.CV_DATA = {
   experience: [
     {
       current: true,
-      when: { sk: "Január 2026 — teraz", en: "January 2026 — present" },
+      when: { sk: "2026 — teraz", en: "2026 — present" },
+      title: { sk: "Administratíva, Odoo a IT", en: "Administration, Odoo & IT" },
+      company: { sk: "4B2B advisory s. r. o., Bratislava", en: "4B2B advisory s. r. o., Bratislava" },
+      desc: { sk: "Administratívna agenda firmy, práca v ERP systéme Odoo a IT úlohy.", en: "Company administration, work in the Odoo ERP system and IT tasks." }
+    },
+    {
+      when: { sk: "Január – Júl 2026", en: "January – July 2026" },
       title: { sk: "Zamestnanec", en: "Employee" },
       company: { sk: "Cinema City Slovakia — Eurovea, Bratislava", en: "Cinema City Slovakia — Eurovea, Bratislava" },
-      desc: { sk: "Zákaznícky servis, predaj lístkov a starostlivosť o návštevníkov. Rozvíjam komunikačné a organizačné zručnosti v rýchlom prostredí.", en: "Customer service, ticket sales and guest care. Developing communication and organizational skills in a fast-paced environment." }
+      desc: { sk: "Zákaznícky servis, predaj lístkov a starostlivosť o návštevníkov. Rozvinul som komunikačné a organizačné zručnosti v rýchlom prostredí.", en: "Customer service, ticket sales and guest care. Developed communication and organizational skills in a fast-paced environment." }
     },
     {
       when: { sk: "Máj – Jún 2026", en: "May – June 2026" },
