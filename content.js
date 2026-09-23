@@ -189,6 +189,7 @@ window.CV_DATA = {
     { issuer: "Vanderbilt University · Coursera", when: { sk: "December 2025", en: "December 2025" }, title: "Prompt Engineering for ChatGPT", img: "certifikaty/coursera-prompt-engineering-chatgpt.jpg", w: 560, h: 425, url: "https://coursera.org/verify/8A5BH7JHN4SU" },
 
     { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Introduction to Cybersecurity", img: "certifikaty/cisco-introduction-cybersecurity.jpg", w: 560, h: 421, url: "https://www.credly.com/badges/3cd04039-59c4-49fd-9889-2e5d6ffbaf48" },
+    { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Networking Basics", img: "certifikaty/cisco-networking-basics.jpg", w: 560, h: 433, url: "https://www.credly.com/badges/e5372be5-b76c-4a9e-af8c-898a6799c603" },
 
     { issuer: "STEP IT Academy", when: "2023", title: "STEP IT Academy Junior", img: "certifikaty/step-it-academy-junior.jpg", w: 560, h: 391 }
   ],
