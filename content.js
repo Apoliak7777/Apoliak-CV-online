@@ -207,6 +207,7 @@ window.CV_DATA = {
     { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Exploring Internet of Things with Cisco Packet Tracer", img: "certifikaty/cisco-packet-tracer-iot.jpg", w: 560, h: 379, url: "https://www.netacad.com/recognitions/verify/53d06dcb-a145-470d-99b4-f797294dbf40" },
     { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "JavaScript Essentials 1", img: "certifikaty/cisco-javascript-essentials-1.jpg", w: 560, h: 379, url: "https://www.netacad.com/recognitions/verify/33f5eeec-381f-4bf1-9811-77ddff47a8b6" },
     { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Python Essentials 1", img: "certifikaty/cisco-python-essentials-1.jpg", w: 560, h: 379, url: "https://www.netacad.com/recognitions/verify/1e5bf43b-4c55-4dab-a279-c980f046035e" },
+    { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Creating Compelling Reports", img: "certifikaty/cisco-creating-compelling-reports.jpg", w: 560, h: 379, url: "https://www.netacad.com/recognitions/verify/db563fc7-a355-46c3-ac87-d28c928c6cbd" },
 
     { issuer: "Odoo S.A.", when: { sk: "September 2026", en: "September 2026" }, title: "Odoo Functional Certification - Sample", img: "certifikaty/odoo-functional-certification-sample.jpg", w: 560, h: 396 },
 
