@@ -13,7 +13,7 @@ window.CV_DATA = {
     accent3: "#7cc5ff",   // treťia farba (jemná modrá — použitá pri certifikátoch)
     photo: "",            // vlož URL fotky; ak je prázdne, zobrazí sa monogram "AP"
     cvFile: "",           // odkaz na hotové PDF; ak je prázdne, tlačidlo "Stiahnuť CV (PDF)" vytlačí túto stránku
-    siteUrl: "https://apoliak7777.github.io/Apoliak-CV-online/",  // plná URL stránky — pre OG náhľad a SEO
+    siteUrl: "https://cv.apoliak.online/",  // plná URL stránky — pre OG náhľad a SEO
     ogImage: "og-image.png",      // náhľad pri zdieľaní odkazu (PNG — WhatsApp, Messenger ani LinkedIn nevedia SVG)
     location: { sk: "Nová Dedinka, Slovensko", en: "Nová Dedinka, Slovakia" },
     locality: "Nová Dedinka",     // obec pre JSON-LD (schema.org PostalAddress)
@@ -202,6 +202,11 @@ window.CV_DATA = {
 
     { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Introduction to Cybersecurity", img: "certifikaty/cisco-introduction-cybersecurity.jpg", w: 560, h: 421, url: "https://www.credly.com/badges/3cd04039-59c4-49fd-9889-2e5d6ffbaf48" },
     { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Networking Basics", img: "certifikaty/cisco-networking-basics.jpg", w: 560, h: 433, url: "https://www.credly.com/badges/e5372be5-b76c-4a9e-af8c-898a6799c603" },
+    { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Getting Started with Cisco Packet Tracer", img: "certifikaty/cisco-packet-tracer-getting-started.jpg", w: 560, h: 379, url: "https://www.netacad.com/recognitions/verify/181b1a5d-f118-4b5f-8b3f-f8331e4a54e5" },
+    { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Exploring Networking with Cisco Packet Tracer", img: "certifikaty/cisco-packet-tracer-networking.jpg", w: 560, h: 379, url: "https://www.netacad.com/recognitions/verify/015ff1a8-0595-46ab-8460-75b1ed5657c7" },
+    { issuer: "Cisco Networking Academy", when: { sk: "September 2026", en: "September 2026" }, title: "Exploring Internet of Things with Cisco Packet Tracer", img: "certifikaty/cisco-packet-tracer-iot.jpg", w: 560, h: 379, url: "https://www.netacad.com/recognitions/verify/53d06dcb-a145-470d-99b4-f797294dbf40" },
+
+    { issuer: "Odoo S.A.", when: { sk: "September 2026", en: "September 2026" }, title: "Odoo Functional Certification - Sample", img: "certifikaty/odoo-functional-certification-sample.jpg", w: 560, h: 396 },
 
     { issuer: "STEP IT Academy", when: "2023", title: "STEP IT Academy Junior", img: "certifikaty/step-it-academy-junior.jpg", w: 560, h: 391 }
   ],

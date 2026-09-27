@@ -94,7 +94,7 @@ window.PROJECTS_DATA = {
     {
       name: "Apoliak CV online",
       repo: "https://github.com/Apoliak7777/Apoliak-CV-online",
-      live: "https://apoliak7777.github.io/Apoliak-CV-online/",
+      live: "https://cv.apoliak.online/",
       img: "projekty-nahlady/cv-online.webp",
       group: "web", year: 2026, lang: "HTML",
       short: {
